@@ -141,7 +141,7 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
 .cat-pct.pos{background:var(--green-bg);color:var(--green)}
 .cat-pct.neg{background:var(--red-bg);color:var(--red)}
 #add-section{padding:0 16px}
-#add-btn{width:100%;padding:13px;background:var(--text);color:var(--bg);border:none;border-radius:10px;font-size:14px;cursor:pointer;font-family:inherit;font-weight:500}
+.add-item-btn{width:100%;padding:13px;background:var(--text);color:var(--bg);border:none;border-radius:10px;font-size:14px;cursor:pointer;font-family:inherit;font-weight:500}
 #add-form{background:var(--card);border-radius:10px;padding:16px;display:none;border:1.5px solid var(--border);margin-top:0}
 #add-form input,#add-form select{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;outline:none;font-family:inherit;margin-bottom:10px;background:var(--bg);color:var(--text)}
 #add-form input:focus,#add-form select:focus{border-color:var(--accent)}
@@ -391,7 +391,7 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
 <div id="view-lista" class="view active">
   <div id="list"></div>
   <div id="add-section">
-    <button id="add-btn" onclick="showForm()">+ Adicionar item</button>
+    <button class="add-item-btn" onclick="showForm()">+ Adicionar item</button>
   </div>
 </div>
 
@@ -427,6 +427,7 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
 
 <div id="view-catalogo" class="view">
   <div style="padding:8px 16px 0">
+    <button class="add-item-btn" onclick="showForm()" style="margin-bottom:10px">+ Adicionar item</button>
     <input id="catalogo-search" class="search-input" placeholder="Buscar no catálogo..." oninput="renderCatalogo()" style="margin-bottom:8px">
     <div class="catalog-note">Preços médios aproximados no Brasil (2026). Toque em <strong>+ Adicionar</strong> para incluir na sua lista.</div>
   </div>
@@ -1114,8 +1115,7 @@ function render(){
       <div class="empty-title">Sua lista está vazia</div>
       <div class="empty-sub">Adicione itens manualmente ou explore o catálogo com mais de 200 produtos</div>
       <div class="empty-btns">
-        <button class="empty-btn-main" onclick="showForm()">+ Adicionar item</button>
-        <button class="empty-btn-sec" onclick="switchView('catalogo')">Ver catálogo</button>
+        <button class="empty-btn-main" onclick="switchView('catalogo')">Ver catálogo</button>
       </div>
     </div>`;
     return;
