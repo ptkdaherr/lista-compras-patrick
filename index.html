@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lista de Compras — Patrick</title>
+<link rel="icon" type="image/svg+xml" href="logo.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 <style>
@@ -324,7 +325,7 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
 <div id="sidebar">
   <div class="sb-head">
     <div class="eyebrow">Patrick Daher</div>
-    <h2>Mercado</h2>
+    <h2><img src="logo.svg" alt="" style="width:24px;height:24px;vertical-align:-5px;margin-right:7px;border-radius:50%">Mercado</h2>
   </div>
   <nav class="sb-nav">
     <div class="nav-item active" data-view="lista" onclick="switchView('lista')">
@@ -475,7 +476,7 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
 const STORAGE_KEY = "patrick-lista-v5";
 const HISTORY_KEY = "patrick-lista-hist-v1";
 const CATALOG_OVERRIDES_KEY = "patrick-catalog-overrides-v1";
-const CATEGORIES = ["🥩 Carnes / Aves","🧊 Frios / Embutidos","🧀 Queijos / Laticínios","🍞 Pães / Massas / Farinhas","🥦 Hortifruti","🌾 Grãos / Cereais","🥤 Bebidas","🧴 Molhos / Temperos","🍪 Snacks / Doces","🧹 Limpeza / Higiene"];
+const CATEGORIES = ["🥩 Carnes / Aves","🧊 Frios / Embutidos","🧀 Queijos / Laticínios","🍞 Pães / Massas / Farinhas","🥦 Hortifruti","🌾 Grãos / Cereais","🥤 Bebidas","🧴 Molhos / Temperos","🍪 Snacks / Doces","🧹 Limpeza / Higiene","🏠 Utensílios / Casa"];
 
 const DEFAULTS = [
   {id:1,name:"Carne moída 500g",cat:"🥩 Carnes / Aves",checked:false,freq:4,qty:1,old:14.00,cur:null},
@@ -577,6 +578,18 @@ const CATALOG = [
   {id:"c23",name:"Linguiça calabresa 500g",cat:"🥩 Carnes / Aves",price:12.00},
   {id:"c24",name:"Linguiça toscana 500g",cat:"🥩 Carnes / Aves",price:12.00},
   {id:"c25",name:"Músculo bovino kg",cat:"🥩 Carnes / Aves",price:30.00},
+  {id:"c1001",name:"Peito de frango desfiado 500g",cat:"🥩 Carnes / Aves",price:14.00},
+  {id:"c1002",name:"Filé de tilápia 500g",cat:"🥩 Carnes / Aves",price:22.00},
+  {id:"c1003",name:"Salmão filé 300g",cat:"🥩 Carnes / Aves",price:35.00},
+  {id:"c1004",name:"Camarão limpo 500g",cat:"🥩 Carnes / Aves",price:38.00},
+  {id:"c1005",name:"Carne de sol 500g",cat:"🥩 Carnes / Aves",price:32.00},
+  {id:"c1006",name:"Lombo suíno kg",cat:"🥩 Carnes / Aves",price:24.00},
+  {id:"c1007",name:"Toscana suína kg",cat:"🥩 Carnes / Aves",price:26.00},
+  {id:"c1008",name:"Hambúrguer bovino 4 unidades",cat:"🥩 Carnes / Aves",price:16.00},
+  {id:"c1009",name:"Almôndega congelada 500g",cat:"🥩 Carnes / Aves",price:15.00},
+  {id:"c1010",name:"Kafta temperada 500g",cat:"🥩 Carnes / Aves",price:18.00},
+  {id:"c1011",name:"Peito de frango temperado 1kg",cat:"🥩 Carnes / Aves",price:17.00},
+  {id:"c1012",name:"Sobrecoxa desossada kg",cat:"🥩 Carnes / Aves",price:16.00},
   // 🧊 Frios / Embutidos
   {id:"c30",name:"Presunto fatiado 200g",cat:"🧊 Frios / Embutidos",price:12.00},
   {id:"c31",name:"Peito de peru fatiado 200g",cat:"🧊 Frios / Embutidos",price:14.00},
@@ -588,6 +601,15 @@ const CATALOG = [
   {id:"c37",name:"Paio 500g",cat:"🧊 Frios / Embutidos",price:16.00},
   {id:"c38",name:"Bacon fatiado 200g",cat:"🧊 Frios / Embutidos",price:14.00},
   {id:"c39",name:"Blanquet de peru 100g",cat:"🧊 Frios / Embutidos",price:8.00},
+  {id:"c1101",name:"Copa fatiada 150g",cat:"🧊 Frios / Embutidos",price:13.00},
+  {id:"c1102",name:"Lombo canadense fatiado 150g",cat:"🧊 Frios / Embutidos",price:15.00},
+  {id:"c1103",name:"Calabresa fatiada 200g",cat:"🧊 Frios / Embutidos",price:10.00},
+  {id:"c1104",name:"Presunto parma fatiado 150g",cat:"🧊 Frios / Embutidos",price:16.00},
+  {id:"c1105",name:"Rosbife fatiado 150g",cat:"🧊 Frios / Embutidos",price:18.00},
+  {id:"c1106",name:"Salaminho 200g",cat:"🧊 Frios / Embutidos",price:14.00},
+  {id:"c1107",name:"Linguiça defumada 400g",cat:"🧊 Frios / Embutidos",price:13.00},
+  {id:"c1108",name:"Bacon em cubos 150g",cat:"🧊 Frios / Embutidos",price:12.00},
+  {id:"c1109",name:"Pepperoni fatiado 100g",cat:"🧊 Frios / Embutidos",price:13.00},
   // 🧀 Queijos / Laticínios
   {id:"c50",name:"Leite integral 1L",cat:"🧀 Queijos / Laticínios",price:5.50},
   {id:"c51",name:"Leite desnatado 1L",cat:"🧀 Queijos / Laticínios",price:5.80},
@@ -611,6 +633,17 @@ const CATALOG = [
   {id:"c69",name:"Ovo caipira 12 unidades",cat:"🧀 Queijos / Laticínios",price:16.00},
   {id:"c70",name:"Leite condensado 395g",cat:"🧀 Queijos / Laticínios",price:6.00},
   {id:"c71",name:"Nata 200g",cat:"🧀 Queijos / Laticínios",price:8.00},
+  {id:"c1201",name:"Queijo minas frescal 400g",cat:"🧀 Queijos / Laticínios",price:16.00},
+  {id:"c1202",name:"Queijo provolone 200g",cat:"🧀 Queijos / Laticínios",price:18.00},
+  {id:"c1203",name:"Queijo gorgonzola 150g",cat:"🧀 Queijos / Laticínios",price:22.00},
+  {id:"c1204",name:"Cream cheese 200g",cat:"🧀 Queijos / Laticínios",price:14.00},
+  {id:"c1205",name:"Iogurte skyr 150g",cat:"🧀 Queijos / Laticínios",price:8.00},
+  {id:"c1206",name:"Bebida láctea 200ml",cat:"🧀 Queijos / Laticínios",price:3.00},
+  {id:"c1207",name:"Leite zero lactose 1L",cat:"🧀 Queijos / Laticínios",price:7.50},
+  {id:"c1208",name:"Manteiga sem sal 200g",cat:"🧀 Queijos / Laticínios",price:12.00},
+  {id:"c1209",name:"Queijo parmesão ralado 100g",cat:"🧀 Queijos / Laticínios",price:9.00},
+  {id:"c1210",name:"Petit suisse 4 unidades",cat:"🧀 Queijos / Laticínios",price:7.00},
+  {id:"c1211",name:"Leite em pó 400g",cat:"🧀 Queijos / Laticínios",price:18.00},
   // 🍞 Pães / Massas / Farinhas
   {id:"c80",name:"Pão de forma 500g",cat:"🍞 Pães / Massas / Farinhas",price:8.50},
   {id:"c81",name:"Pão francês kg",cat:"🍞 Pães / Massas / Farinhas",price:14.00},
@@ -635,6 +668,16 @@ const CATALOG = [
   {id:"c100",name:"Tapioca granulada 500g",cat:"🍞 Pães / Massas / Farinhas",price:7.00},
   {id:"c101",name:"Fermento em pó 100g",cat:"🍞 Pães / Massas / Farinhas",price:5.50},
   {id:"c102",name:"Cuscuz pré-cozido 500g",cat:"🍞 Pães / Massas / Farinhas",price:5.00},
+  {id:"c1301",name:"Pão sírio 4 unidades",cat:"🍞 Pães / Massas / Farinhas",price:9.00},
+  {id:"c1302",name:"Pão baguete unidade",cat:"🍞 Pães / Massas / Farinhas",price:7.00},
+  {id:"c1303",name:"Pão integral light 500g",cat:"🍞 Pães / Massas / Farinhas",price:11.00},
+  {id:"c1304",name:"Massa para pizza pré-assada",cat:"🍞 Pães / Massas / Farinhas",price:12.00},
+  {id:"c1305",name:"Massa para lasanha fresca 500g",cat:"🍞 Pães / Massas / Farinhas",price:14.00},
+  {id:"c1306",name:"Nhoque de batata 500g",cat:"🍞 Pães / Massas / Farinhas",price:9.00},
+  {id:"c1307",name:"Farinha de rosca 200g",cat:"🍞 Pães / Massas / Farinhas",price:5.00},
+  {id:"c1308",name:"Farinha integral 1kg",cat:"🍞 Pães / Massas / Farinhas",price:8.00},
+  {id:"c1309",name:"Mistura para bolo 450g",cat:"🍞 Pães / Massas / Farinhas",price:7.00},
+  {id:"c1310",name:"Massa folhada 400g",cat:"🍞 Pães / Massas / Farinhas",price:10.00},
   // 🥦 Hortifruti
   {id:"c110",name:"Alface crespa unidade",cat:"🥦 Hortifruti",price:3.50},
   {id:"c111",name:"Alface americana unidade",cat:"🥦 Hortifruti",price:4.00},
@@ -674,6 +717,20 @@ const CATALOG = [
   {id:"c145",name:"Morango 300g",cat:"🥦 Hortifruti",price:9.00},
   {id:"c146",name:"Abacate unidade",cat:"🥦 Hortifruti",price:5.00},
   {id:"c147",name:"Gengibre 100g",cat:"🥦 Hortifruti",price:3.50},
+  {id:"c1401",name:"Salsão maço",cat:"🥦 Hortifruti",price:3.50},
+  {id:"c1402",name:"Repolho unidade",cat:"🥦 Hortifruti",price:4.00},
+  {id:"c1403",name:"Vagem 300g",cat:"🥦 Hortifruti",price:5.00},
+  {id:"c1404",name:"Quiabo 500g",cat:"🥦 Hortifruti",price:5.00},
+  {id:"c1405",name:"Milho verde unidade",cat:"🥦 Hortifruti",price:2.00},
+  {id:"c1406",name:"Inhame kg",cat:"🥦 Hortifruti",price:6.00},
+  {id:"c1407",name:"Cará kg",cat:"🥦 Hortifruti",price:6.00},
+  {id:"c1408",name:"Kiwi unidade",cat:"🥦 Hortifruti",price:2.50},
+  {id:"c1409",name:"Pera kg",cat:"🥦 Hortifruti",price:9.00},
+  {id:"c1410",name:"Ameixa kg",cat:"🥦 Hortifruti",price:10.00},
+  {id:"c1411",name:"Coco verde unidade",cat:"🥦 Hortifruti",price:6.00},
+  {id:"c1412",name:"Maracujá kg",cat:"🥦 Hortifruti",price:7.00},
+  {id:"c1413",name:"Pitaya unidade",cat:"🥦 Hortifruti",price:12.00},
+  {id:"c1414",name:"Hortelã maço",cat:"🥦 Hortifruti",price:2.50},
   // 🌾 Grãos / Cereais
   {id:"c160",name:"Arroz branco 5kg",cat:"🌾 Grãos / Cereais",price:22.00},
   {id:"c161",name:"Arroz integral 5kg",cat:"🌾 Grãos / Cereais",price:24.00},
@@ -691,6 +748,14 @@ const CATALOG = [
   {id:"c173",name:"Canjica branca 500g",cat:"🌾 Grãos / Cereais",price:4.00},
   {id:"c174",name:"Quirera de milho 500g",cat:"🌾 Grãos / Cereais",price:4.00},
   {id:"c175",name:"Soja em grãos 500g",cat:"🌾 Grãos / Cereais",price:5.50},
+  {id:"c1501",name:"Quinoa 500g",cat:"🌾 Grãos / Cereais",price:14.00},
+  {id:"c1502",name:"Trigo em grão 500g",cat:"🌾 Grãos / Cereais",price:6.00},
+  {id:"c1503",name:"Cevada em grão 500g",cat:"🌾 Grãos / Cereais",price:6.00},
+  {id:"c1504",name:"Granola sem açúcar 500g",cat:"🌾 Grãos / Cereais",price:16.00},
+  {id:"c1505",name:"Mix de semente 200g",cat:"🌾 Grãos / Cereais",price:12.00},
+  {id:"c1506",name:"Linhaça 250g",cat:"🌾 Grãos / Cereais",price:6.00},
+  {id:"c1507",name:"Chia 250g",cat:"🌾 Grãos / Cereais",price:9.00},
+  {id:"c1508",name:"Amaranto 300g",cat:"🌾 Grãos / Cereais",price:10.00},
   // 🥤 Bebidas
   {id:"c190",name:"Água mineral 1,5L",cat:"🥤 Bebidas",price:3.00},
   {id:"c191",name:"Água com gás 1L",cat:"🥤 Bebidas",price:4.50},
@@ -714,6 +779,16 @@ const CATALOG = [
   {id:"c209",name:"Leite de soja 1L",cat:"🥤 Bebidas",price:7.50},
   {id:"c210",name:"Isotônico 500ml",cat:"🥤 Bebidas",price:5.50},
   {id:"c211",name:"Energético 250ml",cat:"🥤 Bebidas",price:7.00},
+  {id:"c1601",name:"Água tônica 350ml",cat:"🥤 Bebidas",price:4.50},
+  {id:"c1602",name:"Kombucha 300ml",cat:"🥤 Bebidas",price:9.00},
+  {id:"c1603",name:"Suco detox 500ml",cat:"🥤 Bebidas",price:12.00},
+  {id:"c1604",name:"Chá gelado 1,5L",cat:"🥤 Bebidas",price:7.00},
+  {id:"c1605",name:"Bebida isotônica 1L",cat:"🥤 Bebidas",price:8.00},
+  {id:"c1606",name:"Cerveja artesanal 500ml",cat:"🥤 Bebidas",price:14.00},
+  {id:"c1607",name:"Espumante 750ml",cat:"🥤 Bebidas",price:35.00},
+  {id:"c1608",name:"Cachaça 1L",cat:"🥤 Bebidas",price:25.00},
+  {id:"c1609",name:"Café em cápsulas 10 unidades",cat:"🥤 Bebidas",price:22.00},
+  {id:"c1610",name:"Água de coco 1L",cat:"🥤 Bebidas",price:9.00},
   // 🧴 Molhos / Temperos
   {id:"c220",name:"Azeite extra virgem 500ml",cat:"🧴 Molhos / Temperos",price:30.00},
   {id:"c221",name:"Óleo de soja 900ml",cat:"🧴 Molhos / Temperos",price:7.50},
@@ -745,6 +820,16 @@ const CATALOG = [
   {id:"c247",name:"Colorau 100g",cat:"🧴 Molhos / Temperos",price:5.00},
   {id:"c248",name:"Orégano 10g",cat:"🧴 Molhos / Temperos",price:3.50},
   {id:"c249",name:"Curcuma 50g",cat:"🧴 Molhos / Temperos",price:6.00},
+  {id:"c1701",name:"Pasta de tomate seco 200g",cat:"🧴 Molhos / Temperos",price:12.00},
+  {id:"c1702",name:"Azeite trufado 250ml",cat:"🧴 Molhos / Temperos",price:28.00},
+  {id:"c1703",name:"Vinagre balsâmico 250ml",cat:"🧴 Molhos / Temperos",price:18.00},
+  {id:"c1704",name:"Molho barbecue 390g",cat:"🧴 Molhos / Temperos",price:9.00},
+  {id:"c1705",name:"Molho de pimenta 150ml",cat:"🧴 Molhos / Temperos",price:7.00},
+  {id:"c1706",name:"Tahine 200g",cat:"🧴 Molhos / Temperos",price:16.00},
+  {id:"c1707",name:"Curry em pó 50g",cat:"🧴 Molhos / Temperos",price:6.00},
+  {id:"c1708",name:"Cominho em pó 30g",cat:"🧴 Molhos / Temperos",price:5.00},
+  {id:"c1709",name:"Páprica picante 50g",cat:"🧴 Molhos / Temperos",price:6.00},
+  {id:"c1710",name:"Noz-moscada 20g",cat:"🧴 Molhos / Temperos",price:5.00},
   // 🍪 Snacks / Doces
   {id:"c260",name:"Chocolate ao leite 100g",cat:"🍪 Snacks / Doces",price:5.50},
   {id:"c261",name:"Chocolate amargo 70% 100g",cat:"🍪 Snacks / Doces",price:7.00},
@@ -768,6 +853,16 @@ const CATALOG = [
   {id:"c279",name:"Barra de cereal 25g",cat:"🍪 Snacks / Doces",price:2.50},
   {id:"c280",name:"Rapadura 500g",cat:"🍪 Snacks / Doces",price:6.00},
   {id:"c281",name:"Goiabada 300g",cat:"🍪 Snacks / Doces",price:7.00},
+  {id:"c1801",name:"Bolo pronto fatiado 300g",cat:"🍪 Snacks / Doces",price:12.00},
+  {id:"c1802",name:"Brownie individual",cat:"🍪 Snacks / Doces",price:6.00},
+  {id:"c1803",name:"Sorvete pote 1,5L",cat:"🍪 Snacks / Doces",price:22.00},
+  {id:"c1804",name:"Picolé caixa 6 unidades",cat:"🍪 Snacks / Doces",price:15.00},
+  {id:"c1805",name:"Bombom caixa 150g",cat:"🍪 Snacks / Doces",price:16.00},
+  {id:"c1806",name:"Marshmallow 250g",cat:"🍪 Snacks / Doces",price:8.00},
+  {id:"c1807",name:"Bala de goma 500g",cat:"🍪 Snacks / Doces",price:9.00},
+  {id:"c1808",name:"Barra de proteína",cat:"🍪 Snacks / Doces",price:7.00},
+  {id:"c1809",name:"Chocolate trufado caixa",cat:"🍪 Snacks / Doces",price:25.00},
+  {id:"c1810",name:"Pé-de-moleque 100g",cat:"🍪 Snacks / Doces",price:5.00},
   // 🧹 Limpeza / Higiene
   {id:"c300",name:"Sabão em pó 1kg",cat:"🧹 Limpeza / Higiene",price:12.00},
   {id:"c301",name:"Sabão em pó 2kg",cat:"🧹 Limpeza / Higiene",price:22.00},
@@ -803,6 +898,45 @@ const CATALOG = [
   {id:"c331",name:"Sabão em barra 5 unidades",cat:"🧹 Limpeza / Higiene",price:8.00},
   {id:"c332",name:"Pano de prato 2 unidades",cat:"🧹 Limpeza / Higiene",price:7.00},
   {id:"c333",name:"Rodo cabo longo",cat:"🧹 Limpeza / Higiene",price:20.00},
+  // 🏠 Utensílios / Casa
+  {id:"c1901",name:"Pilha AA 4 unidades",cat:"🏠 Utensílios / Casa",price:18.00},
+  {id:"c1902",name:"Pilha AAA 4 unidades",cat:"🏠 Utensílios / Casa",price:18.00},
+  {id:"c1903",name:"Pilha 9V unidade",cat:"🏠 Utensílios / Casa",price:15.00},
+  {id:"c1904",name:"Pilha recarregável 4 unidades",cat:"🏠 Utensílios / Casa",price:35.00},
+  {id:"c1905",name:"Lâmpada LED 9W",cat:"🏠 Utensílios / Casa",price:12.00},
+  {id:"c1906",name:"Lâmpada LED 12W",cat:"🏠 Utensílios / Casa",price:16.00},
+  {id:"c1907",name:"Vela branca 4 unidades",cat:"🏠 Utensílios / Casa",price:6.00},
+  {id:"c1908",name:"Caixa de fósforos",cat:"🏠 Utensílios / Casa",price:3.00},
+  {id:"c1909",name:"Isqueiro",cat:"🏠 Utensílios / Casa",price:4.00},
+  {id:"c1910",name:"Copo de vidro 6 unidades",cat:"🏠 Utensílios / Casa",price:25.00},
+  {id:"c1911",name:"Copo descartável 200ml 50un",cat:"🏠 Utensílios / Casa",price:8.00},
+  {id:"c1912",name:"Prato descartável 15 unidades",cat:"🏠 Utensílios / Casa",price:10.00},
+  {id:"c1913",name:"Kit talher descartável 10 unidades",cat:"🏠 Utensílios / Casa",price:9.00},
+  {id:"c1914",name:"Prato fundo cerâmica",cat:"🏠 Utensílios / Casa",price:18.00},
+  {id:"c1915",name:"Prato raso cerâmica",cat:"🏠 Utensílios / Casa",price:18.00},
+  {id:"c1916",name:"Conjunto de talheres 24 peças",cat:"🏠 Utensílios / Casa",price:60.00},
+  {id:"c1917",name:"Faca de cozinha",cat:"🏠 Utensílios / Casa",price:22.00},
+  {id:"c1918",name:"Tábua de corte",cat:"🏠 Utensílios / Casa",price:25.00},
+  {id:"c1919",name:"Vassoura",cat:"🏠 Utensílios / Casa",price:22.00},
+  {id:"c1920",name:"Pá de lixo com vassourinha",cat:"🏠 Utensílios / Casa",price:15.00},
+  {id:"c1921",name:"Balde 10L",cat:"🏠 Utensílios / Casa",price:20.00},
+  {id:"c1922",name:"Bacia plástica",cat:"🏠 Utensílios / Casa",price:15.00},
+  {id:"c1923",name:"Escorredor de louça",cat:"🏠 Utensílios / Casa",price:28.00},
+  {id:"c1924",name:"Pano de microfibra",cat:"🏠 Utensílios / Casa",price:9.00},
+  {id:"c1925",name:"Varal retrátil",cat:"🏠 Utensílios / Casa",price:35.00},
+  {id:"c1926",name:"Pregador de roupa 12 unidades",cat:"🏠 Utensílios / Casa",price:7.00},
+  {id:"c1927",name:"Cabide plástico 5 unidades",cat:"🏠 Utensílios / Casa",price:12.00},
+  {id:"c1928",name:"Saco de lixo 50L 20 unidades",cat:"🏠 Utensílios / Casa",price:10.00},
+  {id:"c1929",name:"Filme plástico PVC",cat:"🏠 Utensílios / Casa",price:9.00},
+  {id:"c1930",name:"Papel alumínio",cat:"🏠 Utensílios / Casa",price:9.00},
+  {id:"c1931",name:"Caixa de palitos de dente",cat:"🏠 Utensílios / Casa",price:3.00},
+  {id:"c1932",name:"Pote plástico hermético",cat:"🏠 Utensílios / Casa",price:15.00},
+  {id:"c1933",name:"Garrafa térmica 1L",cat:"🏠 Utensílios / Casa",price:45.00},
+  {id:"c1934",name:"Extensão elétrica 5m",cat:"🏠 Utensílios / Casa",price:30.00},
+  {id:"c1935",name:"Fita adesiva",cat:"🏠 Utensílios / Casa",price:6.00},
+  {id:"c1936",name:"Desentupidor de pia",cat:"🏠 Utensílios / Casa",price:18.00},
+  {id:"c1937",name:"Cesto organizador",cat:"🏠 Utensílios / Casa",price:25.00},
+  {id:"c1938",name:"Forma de gelo",cat:"🏠 Utensílios / Casa",price:8.00},
 ];
 
 let items = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null") || [];
