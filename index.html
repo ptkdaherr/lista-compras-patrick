@@ -105,9 +105,6 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
 #header.compact #search{padding:6px 12px;font-size:12px;border-radius:8px}
 #catalogo-search,#catalogo-search::placeholder{background:var(--card) !important;color:var(--text) !important;border-color:var(--border) !important}
 #catalogo-search::placeholder{color:var(--text-3) !important}
-#list-bar{display:flex;align-items:center;gap:6px;padding:10px 16px 0;background:var(--bg);cursor:pointer;user-select:none;font-size:12px}
-#list-bar #active-list-name{font-weight:600;color:var(--accent)}
-#list-bar .list-bar-arrow{font-size:9px;color:var(--text-3)}
 #filters{display:flex;gap:6px;padding:10px 16px 4px;background:var(--bg)}
 .filter-btn{padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);background:transparent;color:var(--text-2);font-size:11px;cursor:pointer;font-family:inherit;transition:all .15s}
 .filter-btn.active{background:var(--text);border-color:var(--text);color:var(--bg)}
@@ -179,14 +176,6 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
 #add-section{padding:0 16px;display:flex;flex-direction:column;gap:8px}
 .add-item-btn{width:100%;padding:13px;background:var(--text);color:var(--bg);border:none;border-radius:10px;font-size:14px;cursor:pointer;font-family:inherit;font-weight:500}
 .add-item-btn-sec{background:var(--card);color:var(--text);border:1.5px solid var(--border)}
-/* SCAN */
-#scan-step-upload p{font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:16px}
-#scan-step-processing{text-align:center;padding:30px 0}
-.scan-spinner{font-size:30px;margin-bottom:10px;animation:scan-pulse 1.2s ease-in-out infinite}
-@keyframes scan-pulse{0%,100%{opacity:.4}50%{opacity:1}}
-#scan-progress{margin-top:8px;font-size:12px;color:var(--text-3)}
-.scan-item-row{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface);border-radius:8px;margin-bottom:6px}
-.scan-item-row input[type=checkbox]{width:18px;height:18px;flex-shrink:0;accent-color:var(--accent)}
 #add-form{background:var(--card);border-radius:10px;padding:16px;display:none;border:1.5px solid var(--border);margin-top:0}
 #add-form input,#add-form select{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;outline:none;font-family:inherit;margin-bottom:10px;background:var(--bg);color:var(--text)}
 #add-form input:focus,#add-form select:focus{border-color:var(--accent)}
@@ -377,6 +366,9 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
     <div class="nav-item active" data-view="lista" onclick="switchView('lista')">
       <span class="nav-icon">🛒</span><span>Lista de Compras</span>
     </div>
+    <div class="nav-item" data-view="listas" onclick="switchView('listas')">
+      <span class="nav-icon">📋</span><span>Minhas Listas</span>
+    </div>
     <div class="nav-item" data-view="catalogo" onclick="switchView('catalogo')">
       <span class="nav-icon">📦</span><span>Catálogo</span>
     </div>
@@ -427,14 +419,8 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
   <div id="mini-progress-wrap"><div id="mini-progress-bar" style="width:0%"></div></div>
 </div>
 
-<div id="list-bar" onclick="openListsModal()">
-  <span>📋</span>
-  <span id="active-list-name">Minha lista</span>
-  <span class="list-bar-arrow">▾</span>
-</div>
-
 <div id="filters">
-  <button class="filter-btn active" onclick="setFilter('todas',this)">Todas</button>
+  <button id="filter-todas-btn" class="filter-btn active" onclick="setFilter('todas',this)">Todas</button>
   <button class="filter-btn" onclick="setFilter('pendentes',this)">Pendentes</button>
   <button class="filter-btn" onclick="setFilter('concluídos',this)">Concluídos</button>
   <button id="reset-btn" onclick="resetAll()">↺ Resetar</button>
@@ -448,7 +434,20 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
   <div id="list"></div>
   <div id="add-section">
     <button class="add-item-btn" onclick="showForm()">+ Adicionar item</button>
-    <button class="add-item-btn add-item-btn-sec" onclick="openScanModal()">📷 Escanear lista (foto)</button>
+  </div>
+</div>
+
+<div id="view-listas" class="view">
+  <div style="padding:16px">
+    <div class="section-label" style="margin-bottom:10px">Suas listas</div>
+    <div id="listas-view-content"></div>
+    <div class="bs-field" style="margin-top:18px">
+      <label class="bs-label">Criar nova lista</label>
+      <div style="display:flex;gap:8px">
+        <input id="new-list-name" class="bs-input" style="margin-bottom:0" placeholder="Ex: Churrasco, Viagem..." onkeydown="if(event.key==='Enter')confirmCreateList()">
+        <button class="btn-confirm" style="white-space:nowrap;padding:0 18px;border-radius:8px" onclick="confirmCreateList()">+ Criar</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -522,39 +521,6 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
   </div>
 </div>
 
-<div id="scan-modal" class="bottom-sheet">
-  <div class="bs-backdrop" onclick="closeScanModal()"></div>
-  <div class="bs-panel">
-    <div class="bs-handle"></div>
-    <div class="bs-title">Escanear lista</div>
-
-    <div id="scan-step-upload">
-      <p>Tire uma foto ou escolha uma imagem da sua lista escrita à mão ou impressa. Funciona melhor com letra legível e boa iluminação.</p>
-      <input type="file" id="scan-file-input" accept="image/*" capture="environment" style="display:none" onchange="handleScanFile(event)">
-      <button class="btn-confirm" style="width:100%;padding:13px;border-radius:10px;font-size:14px" onclick="document.getElementById('scan-file-input').click()">📷 Tirar foto / escolher imagem</button>
-    </div>
-
-    <div id="scan-step-processing" style="display:none">
-      <div class="scan-spinner">🔍</div>
-      <div>Lendo sua lista...</div>
-      <div id="scan-progress"></div>
-    </div>
-
-    <div id="scan-step-review" style="display:none">
-      <div class="bs-field">
-        <label class="bs-label">Categoria para estes itens</label>
-        <select id="scan-cat" class="bs-input" style="appearance:auto"></select>
-      </div>
-      <label class="bs-label">Itens encontrados — edite ou desmarque o que não quiser</label>
-      <div id="scan-items-list" style="margin-top:8px"></div>
-      <div class="bs-btns">
-        <button class="bs-btn-cancel" onclick="closeScanModal()">Cancelar</button>
-        <button class="bs-btn-save" onclick="confirmScanItems()">Adicionar à lista</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <div id="qr-modal" class="bottom-sheet">
   <div class="bs-backdrop" onclick="closeQrModal()"></div>
   <div class="bs-panel">
@@ -580,23 +546,6 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
     <div class="bs-btns" id="qr-btns-result" style="display:none">
       <button class="bs-btn-cancel" onclick="closeQrModal()">Fechar</button>
       <button class="bs-btn-save" onclick="openQrResultLink()">Abrir nota fiscal</button>
-    </div>
-  </div>
-</div>
-
-<div id="lists-modal" class="bottom-sheet">
-  <div class="bs-backdrop" onclick="closeListsModal()"></div>
-  <div class="bs-panel">
-    <div class="bs-handle"></div>
-    <div class="bs-title">Minhas listas</div>
-    <div id="lists-modal-content"></div>
-    <div class="bs-field" style="margin-top:14px">
-      <label class="bs-label">Nova lista</label>
-      <input id="new-list-name" class="bs-input" placeholder="Ex: Churrasco, Viagem..." onkeydown="if(event.key==='Enter')confirmCreateList()">
-    </div>
-    <div class="bs-btns">
-      <button class="bs-btn-cancel" onclick="closeListsModal()">Fechar</button>
-      <button class="bs-btn-save" onclick="confirmCreateList()">+ Criar lista</button>
     </div>
   </div>
 </div>
@@ -1120,17 +1069,8 @@ function fmt(v){ return "R$ " + Number(v).toFixed(2).replace(".",","); }
 /* ── MINHAS LISTAS ── */
 function activeList(){ return lists.find(l => l.id===activeListId); }
 function updateListSwitcherLabel(){
-  const el = document.getElementById("active-list-name");
-  if(el){ const l = activeList(); el.textContent = l ? l.name : "Lista"; }
-}
-function openListsModal(){
-  renderListsModal();
-  document.getElementById("lists-modal").classList.add("open");
-  setTimeout(() => document.getElementById("new-list-name").focus(), 150);
-}
-function closeListsModal(){
-  document.getElementById("lists-modal").classList.remove("open");
-  document.getElementById("new-list-name").value = "";
+  const el = document.getElementById("page-sub");
+  if(el && currentView==="lista"){ const l = activeList(); el.textContent = l ? "📋 " + l.name : "Compras em equipe"; }
 }
 function switchList(id){
   if(id===activeListId) return;
@@ -1140,8 +1080,6 @@ function switchList(id){
   items = (activeList().items || []).map(i => ({ qty:1, ...i }));
   collapsed = {};
   filter = "todas";
-  render();
-  renderListsModal();
   updateListSwitcherLabel();
   showToast("✓ Lista \"" + activeList().name + "\" selecionada");
 }
@@ -1150,6 +1088,7 @@ function createList(name){
   lists.push({id, name: name || "Nova lista", items: []});
   localStorage.setItem(LISTS_KEY, JSON.stringify(lists));
   switchList(id);
+  renderListasView();
 }
 function confirmCreateList(){
   const v = document.getElementById("new-list-name").value.trim();
@@ -1162,7 +1101,7 @@ function renameList(id, val){
   const l = lists.find(l => l.id===id);
   if(l && v) l.name = v;
   localStorage.setItem(LISTS_KEY, JSON.stringify(lists));
-  renderListsModal();
+  renderListasView();
   updateListSwitcherLabel();
 }
 function deleteList(id){
@@ -1173,10 +1112,9 @@ function deleteList(id){
     activeListId = lists[0].id;
     localStorage.setItem(ACTIVE_LIST_KEY, activeListId);
     items = (activeList().items || []).map(i => ({ qty:1, ...i }));
-    render();
     updateListSwitcherLabel();
   }
-  renderListsModal();
+  renderListasView();
 }
 function importItemsToActive(sourceItems){
   if(!sourceItems || !sourceItems.length) return;
@@ -1191,8 +1129,12 @@ function importItemsToActive(sourceItems){
   save(); render();
   showToast("✓ Itens importados para \"" + activeList().name + "\"");
 }
-function renderListsModal(){
-  const el = document.getElementById("lists-modal-content");
+function useList(id){
+  switchList(id);
+  switchView("lista");
+}
+function renderListasView(){
+  const el = document.getElementById("listas-view-content");
   if(!el) return;
   el.innerHTML = lists.map(l => {
     const isActive = l.id===activeListId;
@@ -1203,92 +1145,11 @@ function renderListsModal(){
         onblur="renameList('${l.id}',this.value)"
         onkeydown="if(event.key==='Enter')this.blur()">
       <span class="ml-item-meta">${(l.items||[]).length} itens</span>
-      ${!isActive?`<button class="hist-add-prev-btn" style="padding:5px 9px;font-size:10px" onclick="switchList('${l.id}');closeListsModal()">Usar</button>
+      ${!isActive?`<button class="hist-add-prev-btn" style="padding:5px 9px;font-size:10px" onclick="useList('${l.id}')">Usar</button>
       <button class="hist-act-btn" onclick="importItemsToActive((lists.find(x=>x.id==='${l.id}')||{}).items||[])" title="Importar itens desta lista para a lista ativa">📥</button>`:`<span style="font-size:10px;color:var(--accent);font-weight:600;padding:0 4px">ativa</span>`}
       ${lists.length>1?`<button class="ml-item-rm" onclick="deleteList('${l.id}')">×</button>`:""}
     </div>`;
   }).join("");
-}
-
-/* ── ESCANEAR LISTA (OCR) ── */
-let scannedItems = [];
-let tesseractLoadPromise = null;
-
-function loadTesseract(){
-  if(window.Tesseract) return Promise.resolve();
-  if(tesseractLoadPromise) return tesseractLoadPromise;
-  tesseractLoadPromise = new Promise((resolve, reject) => {
-    const s = document.createElement("script");
-    s.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
-    s.onload = resolve;
-    s.onerror = () => reject(new Error("Falha ao carregar leitor de texto"));
-    document.head.appendChild(s);
-  });
-  return tesseractLoadPromise;
-}
-function showScanStep(step){
-  ["upload","processing","review"].forEach(s => {
-    document.getElementById("scan-step-"+s).style.display = s===step ? "block" : "none";
-  });
-}
-function openScanModal(){
-  scannedItems = [];
-  showScanStep("upload");
-  const sel = document.getElementById("scan-cat");
-  if(!sel.children.length){
-    CATEGORIES.forEach(c => { const o=document.createElement("option"); o.value=c; o.textContent=c; sel.appendChild(o); });
-  }
-  document.getElementById("scan-modal").classList.add("open");
-}
-function closeScanModal(){
-  document.getElementById("scan-modal").classList.remove("open");
-  document.getElementById("scan-file-input").value = "";
-  scannedItems = [];
-}
-async function handleScanFile(e){
-  const file = e.target.files[0];
-  if(!file) return;
-  showScanStep("processing");
-  const progressEl = document.getElementById("scan-progress");
-  progressEl.textContent = "Carregando leitor de texto...";
-  try{
-    await loadTesseract();
-    const result = await Tesseract.recognize(file, "por", {
-      logger: m => {
-        if(m.status === "recognizing text") progressEl.textContent = "Lendo... " + Math.round((m.progress||0)*100) + "%";
-      }
-    });
-    const lines = (result.data.text || "").split("\n")
-      .map(l => l.trim().replace(/^[-•*▪︎●0-9.)\s]+/, "").trim())
-      .filter(l => l.length >= 2);
-    if(!lines.length){
-      showToast("Não consegui ler nenhum item. Tente uma foto mais nítida.");
-      closeScanModal();
-      return;
-    }
-    scannedItems = lines.map(l => ({name:l, include:true}));
-    renderScanItems();
-    showScanStep("review");
-  } catch(err){
-    showToast("Erro ao ler a imagem. Tente novamente.");
-    closeScanModal();
-  }
-}
-function renderScanItems(){
-  const el = document.getElementById("scan-items-list");
-  el.innerHTML = scannedItems.map((it, idx) => `
-    <div class="scan-item-row">
-      <input type="checkbox" ${it.include?"checked":""} onchange="scannedItems[${idx}].include=this.checked">
-      <input class="name-edit-input" style="flex:1" value="${it.name.replace(/"/g,'&quot;')}" oninput="scannedItems[${idx}].name=this.value">
-      <button class="ml-item-rm" onclick="scannedItems.splice(${idx},1);renderScanItems()">×</button>
-    </div>`).join("");
-}
-function confirmScanItems(){
-  const cat = document.getElementById("scan-cat").value;
-  const toAdd = scannedItems.filter(i => i.include && i.name.trim());
-  if(!toAdd.length){ showToast("Nenhum item selecionado"); return; }
-  importItemsToActive(toAdd.map(i => ({name:i.name.trim(), qty:1, price:null, cat})));
-  closeScanModal();
 }
 
 /* ── LER QR DA NOTA FISCAL ── */
@@ -1385,18 +1246,21 @@ function switchView(view){
   document.querySelectorAll(".nav-item").forEach(el => el.classList.remove("active"));
   document.getElementById("view-"+view).classList.add("active");
   document.querySelector(`.nav-item[data-view="${view}"]`).classList.add("active");
-  const titles = {lista:"Lista de Compras",catalogo:"Catálogo",historico:"Histórico",metricas:"Métricas"};
+  const titles = {lista:"Lista de Compras",listas:"Minhas Listas",catalogo:"Catálogo",historico:"Histórico",metricas:"Métricas"};
   document.getElementById("page-title").textContent = titles[view];
   const isLista = view === "lista";
-  ["header-lista-extras","list-bar","filters","legend"].forEach(id => {
+  ["header-lista-extras","filters","legend"].forEach(id => {
     document.getElementById(id).style.display = isLista ? "" : "none";
   });
   document.getElementById("save-btn").style.display = isLista && items.length > 0 ? "block" : "none";
   document.getElementById("share-btn").style.display = isLista && items.length > 0 ? "block" : "none";
+  if(isLista) updateListSwitcherLabel();
+  else document.getElementById("page-sub").textContent = "Compras em equipe";
   window.scrollTo(0,0);
   if(view === "metricas") renderMetricas();
   if(view === "catalogo") renderCatalogo();
   if(view === "historico") renderHistorico();
+  if(view === "listas") renderListasView();
   if(view === "lista") render();
 }
 
@@ -1487,7 +1351,12 @@ function resetAll(){
     pushToHistory(checked, `Compra de ${months[now.getMonth()]}`, now.toISOString().split("T")[0]);
   }
   items = items.map(i => ({...i, checked:false, qty:1}));
+  filter = "todas";
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  const todasBtn = document.getElementById("filter-todas-btn");
+  if(todasBtn) todasBtn.classList.add("active");
   save(); render();
+  showToast(checked.length > 0 ? "✓ Lista resetada · compra salva no histórico" : "✓ Lista resetada");
 }
 function toggleItem(id){
   items = items.map(i => i.id===id ? {...i, checked:!i.checked} : i);
@@ -1569,7 +1438,6 @@ function render(){
       <div class="empty-sub">Adicione itens manualmente ou explore o catálogo com mais de 200 produtos</div>
       <div class="empty-btns">
         <button class="empty-btn-main" onclick="switchView('catalogo')">Ver catálogo</button>
-        <button class="empty-btn-sec" onclick="openScanModal()">📷 Escanear lista</button>
       </div>
     </div>`;
     return;
