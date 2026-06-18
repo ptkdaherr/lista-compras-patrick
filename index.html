@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>try{document.documentElement.setAttribute("data-theme", localStorage.getItem("theme-pref")||"light");}catch(e){}</script>
 <title>Lista de Compras</title>
 <meta name="description" content="Lista de compras, catálogo de produtos e histórico de mercado.">
 
@@ -39,6 +40,14 @@
   --red:#b84a4a; --green:#4a7c59; --red-bg:#fceaea; --green-bg:#eaf4ee;
   --hero:#111111; --hero-sub:#666666; --hero-border:#222222;
 }
+[data-theme="dark"] {
+  --bg:#1b1712; --surface:#221d16; --card:#28221a;
+  --text:#efe6d6; --text-2:#b3a791; --text-3:#7d735f;
+  --accent:#d6ab6e; --accent-bg:#3a2e1c; --border:#3a3326;
+  --red:#e08989; --green:#7fc99a; --red-bg:#3a2424; --green-bg:#1f3329;
+  --hero:#0c0a08; --hero-sub:#8a8170; --hero-border:#000000;
+}
+body{transition:background-color .25s, color .25s}
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margin:0 auto;padding-bottom:80px;color:var(--text)}
 #overlay{position:fixed;inset:0;background:rgba(42,31,16,.42);z-index:40;opacity:0;pointer-events:none;transition:opacity .25s}
@@ -257,6 +266,7 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 /* SAVE BUTTON */
 #save-btn{background:rgba(184,146,90,.12);border:1px solid rgba(184,146,90,.25);color:var(--accent);border-radius:6px;padding:4px 9px;font-size:10px;cursor:pointer;font-family:inherit;white-space:nowrap;display:none;font-weight:500}
+#share-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:rgba(240,232,216,.85);border-radius:6px;padding:4px 9px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap;display:none;margin-right:6px}
 /* SAVE MODAL */
 .bottom-sheet{position:fixed;inset:0;z-index:150;display:none}
 .bottom-sheet.open{display:block}
@@ -376,6 +386,9 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
     <div class="nav-item" data-view="metricas" onclick="switchView('metricas')">
       <span class="nav-icon">📊</span><span>Métricas</span>
     </div>
+    <div class="nav-item" onclick="toggleTheme()" style="border-top:1px solid var(--border);margin-top:8px">
+      <span class="nav-icon" id="theme-icon">🌙</span><span id="theme-label">Modo escuro</span>
+    </div>
   </nav>
   <div class="sb-foot">idealizado por Patrick Daher</div>
 </div>
@@ -390,6 +403,7 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
       <div id="page-sub">Compras em equipe</div>
       <div id="compact-stat"></div>
     </div>
+    <button id="share-btn" onclick="shareList()" title="Compartilhar lista">📤</button>
     <button id="save-btn" onclick="openSaveModal()">💾 Salvar</button>
   </div>
   <div id="header-lista-extras">
@@ -1271,6 +1285,7 @@ function switchView(view){
     document.getElementById(id).style.display = isLista ? "" : "none";
   });
   document.getElementById("save-btn").style.display = isLista && items.length > 0 ? "block" : "none";
+  document.getElementById("share-btn").style.display = isLista && items.length > 0 ? "block" : "none";
   window.scrollTo(0,0);
   if(view === "metricas") renderMetricas();
   if(view === "catalogo") renderCatalogo();
@@ -1306,6 +1321,48 @@ function confirmSaveList(){
   closeSaveModal();
   showToast("✓ Lista salva no histórico");
   switchView("historico");
+}
+
+/* ── COMPARTILHAR ── */
+function buildShareText(){
+  const l = activeList();
+  const lines = [`🛒 *${l ? l.name : "Lista de Compras"}*`, ""];
+  CATEGORIES.forEach(cat => {
+    const catItems = items.filter(i => i.cat===cat);
+    if(!catItems.length) return;
+    lines.push(cat);
+    catItems.forEach(i => {
+      const qty = i.qty>1 ? ` (${i.qty}x)` : "";
+      lines.push(`${i.checked?"✅":"⬜"} ${i.name}${qty}`);
+    });
+    lines.push("");
+  });
+  const totalVal = items.reduce((a,i) => { const p=i.cur!=null?i.cur:(i.old!=null?i.old:0); return a+p*(i.qty||1); },0);
+  if(totalVal>0) lines.push(`Total estimado: ${fmt(totalVal)}`);
+  return lines.join("\n").trim();
+}
+async function shareList(){
+  if(!items.length){ showToast("Sua lista está vazia"); return; }
+  const text = buildShareText();
+  if(navigator.share){
+    try{ await navigator.share({title:"Lista de Compras", text}); return; }
+    catch(e){ if(e && e.name==="AbortError") return; }
+  }
+  window.open("https://api.whatsapp.com/send/?text=" + encodeURIComponent(text), "_blank");
+}
+
+/* ── TEMA ── */
+function applyTheme(theme){
+  document.documentElement.setAttribute("data-theme", theme);
+  localStorage.setItem("theme-pref", theme);
+  const icon = document.getElementById("theme-icon");
+  const label = document.getElementById("theme-label");
+  if(icon) icon.textContent = theme==="dark" ? "☀️" : "🌙";
+  if(label) label.textContent = theme==="dark" ? "Modo claro" : "Modo escuro";
+}
+function toggleTheme(){
+  const cur = document.documentElement.getAttribute("data-theme") || "light";
+  applyTheme(cur==="dark" ? "light" : "dark");
 }
 
 /* ── LISTA ── */
@@ -1396,6 +1453,7 @@ function render(){
 
   // empty state
   document.getElementById("save-btn").style.display = total > 0 && currentView==="lista" ? "block" : "none";
+  document.getElementById("share-btn").style.display = total > 0 && currentView==="lista" ? "block" : "none";
   if(total === 0){
     document.getElementById("progress-wrap").style.display = "none";
     document.getElementById("list").innerHTML = `<div class="empty-state">
@@ -2047,6 +2105,7 @@ CATEGORIES.forEach(c => {
   sel.appendChild(opt);
 });
 loadCatalogOverrides();
+applyTheme(document.documentElement.getAttribute("data-theme") || "light");
 render();
 
 /* ── SCROLL COMPACT HEADER ── */
