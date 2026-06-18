@@ -555,6 +555,35 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
   </div>
 </div>
 
+<div id="qr-modal" class="bottom-sheet">
+  <div class="bs-backdrop" onclick="closeQrModal()"></div>
+  <div class="bs-panel">
+    <div class="bs-handle"></div>
+    <div class="bs-title">Ler nota fiscal (QR code)</div>
+
+    <div id="qr-step-scan">
+      <p>Aponte a câmera para o QR code impresso na nota fiscal do mercado.</p>
+      <video id="qr-video" playsinline muted style="width:100%;border-radius:10px;background:#000;display:block"></video>
+      <div id="qr-status" style="font-size:12px;color:var(--text-3);margin-top:8px;text-align:center">Carregando leitor de QR...</div>
+    </div>
+
+    <div id="qr-step-result" style="display:none">
+      <p>QR code lido! Esse link leva direto pra nota fiscal na Receita do seu estado, com todos os itens e valores.</p>
+      <div id="qr-result-link" style="font-size:11px;color:var(--text-2);background:var(--surface);border-radius:8px;padding:10px 12px;word-break:break-all;margin-bottom:4px"></div>
+    </div>
+
+    <canvas id="qr-canvas" style="display:none"></canvas>
+
+    <div class="bs-btns" id="qr-btns-scan">
+      <button class="bs-btn-cancel" style="width:100%" onclick="closeQrModal()">Cancelar</button>
+    </div>
+    <div class="bs-btns" id="qr-btns-result" style="display:none">
+      <button class="bs-btn-cancel" onclick="closeQrModal()">Fechar</button>
+      <button class="bs-btn-save" onclick="openQrResultLink()">Abrir nota fiscal</button>
+    </div>
+  </div>
+</div>
+
 <div id="lists-modal" class="bottom-sheet">
   <div class="bs-backdrop" onclick="closeListsModal()"></div>
   <div class="bs-panel">
@@ -1262,6 +1291,84 @@ function confirmScanItems(){
   closeScanModal();
 }
 
+/* ── LER QR DA NOTA FISCAL ── */
+let qrLoadPromise = null;
+let qrStream = null;
+let qrAnimFrame = null;
+let qrLastResult = null;
+
+function loadJsQR(){
+  if(window.jsQR) return Promise.resolve();
+  if(qrLoadPromise) return qrLoadPromise;
+  qrLoadPromise = new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js";
+    s.onload = resolve;
+    s.onerror = () => reject(new Error("Falha ao carregar leitor de QR"));
+    document.head.appendChild(s);
+  });
+  return qrLoadPromise;
+}
+async function openQrModal(){
+  qrLastResult = null;
+  document.getElementById("qr-modal").classList.add("open");
+  document.getElementById("qr-step-scan").style.display = "block";
+  document.getElementById("qr-step-result").style.display = "none";
+  document.getElementById("qr-btns-scan").style.display = "block";
+  document.getElementById("qr-btns-result").style.display = "none";
+  document.getElementById("qr-status").textContent = "Carregando leitor de QR...";
+  try{
+    await loadJsQR();
+    document.getElementById("qr-status").textContent = "Abrindo câmera...";
+    qrStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:"environment"}});
+    const video = document.getElementById("qr-video");
+    video.srcObject = qrStream;
+    await video.play();
+    document.getElementById("qr-status").textContent = "Aponte para o QR code...";
+    scanQrFrame();
+  } catch(err){
+    document.getElementById("qr-status").textContent = "Não foi possível acessar a câmera. Verifique a permissão do navegador e tente de novo.";
+  }
+}
+function scanQrFrame(){
+  const video = document.getElementById("qr-video");
+  const canvas = document.getElementById("qr-canvas");
+  if(video.readyState === video.HAVE_ENOUGH_DATA && video.videoWidth > 0){
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const code = window.jsQR(imageData.data, imageData.width, imageData.height);
+    if(code && code.data){
+      showQrResult(code.data);
+      return;
+    }
+  }
+  qrAnimFrame = requestAnimationFrame(scanQrFrame);
+}
+function showQrResult(data){
+  stopQrCamera();
+  qrLastResult = data;
+  document.getElementById("qr-step-scan").style.display = "none";
+  document.getElementById("qr-step-result").style.display = "block";
+  document.getElementById("qr-btns-scan").style.display = "none";
+  document.getElementById("qr-btns-result").style.display = "flex";
+  document.getElementById("qr-result-link").textContent = data;
+}
+function openQrResultLink(){
+  if(qrLastResult) window.open(qrLastResult, "_blank");
+}
+function stopQrCamera(){
+  if(qrAnimFrame) cancelAnimationFrame(qrAnimFrame);
+  qrAnimFrame = null;
+  if(qrStream){ qrStream.getTracks().forEach(t => t.stop()); qrStream = null; }
+}
+function closeQrModal(){
+  stopQrCamera();
+  document.getElementById("qr-modal").classList.remove("open");
+}
+
 /* ── SIDEBAR ── */
 function openSidebar(){
   document.getElementById("sidebar").classList.add("open");
@@ -1805,7 +1912,10 @@ function renderHistorico(){
 
   const headerRow = `<div class="hist-header-row">
     <span style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-3)">${history.length} lista${history.length!==1?"s":""} salva${history.length!==1?"s":""}</span>
-    <button class="hist-add-prev-btn" onclick="openManualList()">+ Adicionar anterior</button>
+    <div style="display:flex;gap:6px">
+      <button class="hist-add-prev-btn" onclick="openQrModal()" title="Ler QR code da nota fiscal">🧾 QR</button>
+      <button class="hist-add-prev-btn" onclick="openManualList()">+ Adicionar anterior</button>
+    </div>
   </div>`;
 
   if(!history.length){
