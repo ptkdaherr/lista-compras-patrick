@@ -236,11 +236,11 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
 .hist-empty .hist-empty-icon{font-size:36px;margin-bottom:12px}
 .hist-empty p{font-size:14px}
 .hist-session{background:var(--card);border-radius:12px;border:1px solid var(--border);margin-bottom:10px;overflow:hidden}
-.hist-session-header{display:flex;align-items:center;padding:14px 16px;cursor:pointer;user-select:none}
-.hist-session-date{flex:1}
+.hist-session-header{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;padding:14px 16px;cursor:pointer;user-select:none}
+.hist-session-date{flex:1 1 100%;min-width:0}
 .hist-session-date .date-main{font-size:14px;font-weight:500;color:var(--text)}
 .hist-session-date .date-sub{font-size:11px;color:var(--text-3);margin-top:1px}
-.hist-session-total{font-size:15px;font-weight:700;font-family:monospace;color:var(--accent);margin-right:10px}
+.hist-session-total{font-size:15px;font-weight:700;font-family:monospace;color:var(--accent);white-space:nowrap;flex-shrink:0;margin-right:auto}
 .hist-session-arrow{color:var(--text-3);font-size:11px;transition:transform .2s}
 .hist-session-arrow.open{transform:rotate(180deg)}
 .hist-session-body{display:none;border-top:1px solid var(--surface);padding:4px 0}
@@ -350,7 +350,7 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
 .hist-add-prev-btn{background:var(--surface);border:1.5px solid var(--border);color:var(--text-2);border-radius:8px;padding:9px 13px;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap}
 .hist-add-prev-btn:active{border-color:var(--accent);color:var(--accent)}
 /* HIST EDIÇÃO */
-.hist-name-input{background:none;border:none;border-bottom:1.5px solid var(--accent);outline:none;font-family:inherit;font-size:14px;font-weight:500;color:var(--text);width:100%;padding:2px 0;margin-bottom:2px}
+.hist-name-input{background:none;border:none;border-bottom:1.5px solid var(--accent);outline:none;font-family:inherit;font-size:14px;font-weight:500;color:var(--text);width:100%;min-width:0;padding:2px 0;margin-bottom:2px}
 .hist-date-input{font-size:11px;color:var(--text-2);padding:2px 0;background:none;border:none;border-bottom:1px solid var(--border);outline:none;font-family:inherit;color-scheme:light}
 .hist-session-actions{display:flex;gap:4px;margin-left:4px;flex-shrink:0}
 .hist-act-btn{background:none;border:none;cursor:pointer;padding:7px 9px;min-width:36px;border-radius:6px;font-size:14px;color:var(--text-3);transition:all .15s}
@@ -700,7 +700,7 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
 const STORAGE_KEY = "patrick-lista-v5";
 const HISTORY_KEY = "patrick-lista-hist-v1";
 const CATALOG_OVERRIDES_KEY = "patrick-catalog-overrides-v1";
-const CATEGORIES = ["🥩 Carnes / Aves","🧊 Frios / Embutidos","🧀 Queijos / Laticínios","🍞 Pães / Massas / Farinhas","🥦 Hortifruti","🌾 Grãos / Cereais","🥤 Bebidas","🧴 Molhos / Temperos","🍪 Snacks / Doces","🧹 Limpeza / Higiene","🏠 Utensílios / Casa"];
+const CATEGORIES = ["🥩 Carnes / Aves","🧊 Frios / Embutidos","🧀 Queijos / Laticínios","🍞 Pães / Massas / Farinhas","🥦 Hortifruti","🌾 Grãos / Cereais","🥤 Bebidas","🧴 Molhos / Temperos","🍪 Snacks / Doces","🧹 Limpeza / Higiene","🏠 Utensílios / Casa","📦 Outros"];
 
 const DEFAULTS = [
   {id:1,name:"Carne moída 500g",cat:"🥩 Carnes / Aves",checked:false,freq:4,qty:1,old:14.00,cur:null},
@@ -1758,25 +1758,32 @@ async function pdfPageToBlob(pdf){
 function nfiTitleCase(s){
   return s.toLowerCase().replace(/\b([a-zà-ÿ])([a-zà-ÿ']*)/g, (m,a,b) => a.toUpperCase()+b).trim();
 }
+// Adivinha a categoria pelo nome do item. Funciona até com os nomes BEM abreviados
+// das notas fiscais (NFC-e): "QJ MUSS" (queijo), "LTE INT" (leite), "FEIJ PTO" (feijão),
+// "MARG" (margarina), "SBT" (sabonete), "PH" (papel higiênico), "CAR MOID" (carne moída)...
+// A ORDEM importa: a primeira categoria que casar vence. Por isso Pães vem antes de Queijos
+// (pra "pão de queijo" não virar queijo) e Molhos antes de Hortifruti (pra "molho/extrato de
+// tomate" não virar tomate fresco). Tokens curtos/ambíguos levam espaços de fronteira (ex.: " sal ").
+// Quando nada casa, vai pra "📦 Outros" (e NÃO pra Carnes) — o usuário escolhe.
 function guessCat(name){
   const n = " " + name.toLowerCase() + " ";
   const map = [
-    ["🥩 Carnes / Aves", ["carne","frango","file","filé","coxa","sobrecoxa","picanha","alcatra","acem","patinho","costela","linguic","linguiç","bisteca","peito de frango","moida","moída","pernil","bacon","peixe","tilap","tilá","camar","salsicha","fraldinha","maminha","cupim","asa de frango"]],
-    ["🧊 Frios / Embutidos", ["presunto","mortadela","salame","peito de peru","apresuntado","embutido","copa "]],
-    ["🧀 Queijos / Laticínios", ["queijo","mussarela","muçarela","muçar","requeij","leite","iogurte","manteiga","margarina","creme de leite","leite conden","nata "]],
-    ["🍞 Pães / Massas / Farinhas", ["pao","pão","pães","biscoito","bolacha","macarr","massa","farinha","trigo","torrada","bisnaga","croissant","lasanha","nhoque"]],
-    ["🥦 Hortifruti", ["banana","maca ","maçã","laranja","tomate","batata","cebola","alho","alface","cenoura","limao","limão","mamao","mamão","melancia","melao","melão","uva","manga","abacaxi","abacate","verdura","legume","fruta","brocolis","brócolis","abobrinha","pimentao","pimentão","couve","mandioca","beterraba","pepino","repolho","morango","goiaba","maracuja","maracujá"]],
-    ["🌾 Grãos / Cereais", ["arroz","feijao","feijão","lentilha","grao","grão","aveia","granola","cereal","milho","ervilha","quinoa","gergelim"]],
-    ["🥤 Bebidas", ["refrigerante","suco","cerveja","agua","água","refri","coca","guarana","guaraná","vinho","energetic","energétic","cha ","chá","cafe","café","achocolat","nescau","toddy","fanta","sprite","schweppes","isotonic","gatorade"]],
-    ["🧴 Molhos / Temperos", ["oleo","óleo","azeite"," sal ","açucar","açúcar","acucar","vinagre","molho","ketchup","catchup","maionese","mostarda","tempero","caldo ","extrato","oregano","orégano","pimenta","shoyu","colorau","cominho"]],
-    ["🍪 Snacks / Doces", ["chocolate","bala ","chiclete","salgadinho","batata frita","doce","bombom","pipoca","amendoim","wafer","pacoca","paçoca","gelatina","sorvete","brigadeiro","biscoito recheado","barra de cereal"]],
-    ["🧹 Limpeza / Higiene", ["sabao","sabão","detergente","amaciante","desinfet","sanitar","sanitár","cloro","papel higien","papel higiê","sabonete","shampoo","xampu","condicionador","creme dental","pasta de dente","desodor","absorvente","fralda","esponja","alcool","álcool","limpa ","lustra","multiuso","guardanapo","papel toalha","cotonete","lenco","lenço"]],
-    ["🏠 Utensílios / Casa", ["pilha","lampada","lâmpada","vela ","fosforo","fósforo","saco de lixo","papel aluminio","papel alumínio","filme pvc","copo descart","prato descart","isqueiro","palito"]]
+    ["🥩 Carnes / Aves", ["carne","carnes","carn ","car moid","carne moida","carne moída","moida","moída","moid","frango","fgo","galinha","peito de frango","peito fgo","peito ","coxa","sobrecoxa","asa de frango","picanha","alcatra","maminha","fraldinha","contrafile","contrafilé","file mignon","filé mignon","mignon","coxao","coxão","lagarto","musculo","músculo","acem","acém","patinho","cupim","costela","costelinha","bisteca","figado","fígado","pernil","lombo","lombinho"," suino"," suíno","porco","picadinho","cordeiro","carneiro","cabrito","tilapia","tilápia","tilap","post tilap","salmao","salmão","merluza","pescada","posta ","peixe","camarao","camarão"," lula","polvo","bacalhau","kafta","kefta","almondega","almôndega","espetinho"]],
+    ["🧊 Frios / Embutidos", ["presunto","pres ","apresuntado","mortadela","mortad","salsicha","salsich","linguica","linguiça","linguic","calabresa","calabr","salame","salaminho","salam","bacon","toucinho","panceta","pancetta","paio ","copa ","peito de peru","peito peru","blanquet","tender ","salpicao","salpicão","fiambre","pepperoni","peperoni","kabana","mortandela"]],
+    ["🍞 Pães / Massas / Farinhas", ["pao","pão","paes","pães","paozinho","pãozinho","pao de forma","pão de forma","bisnaga","bisnaguinha","panettone","panetone","croissant","brioche","rosca ","broa","torrada","torrad","biscoito","biscoit","bolacha","bolach","bisc ","macarrao","macarrão","macarr","espaguete","espaguet","talharim","lasanha","lasanh","nhoque","ravioli","capeletti","panqueca","cuscuz","tapioca","polvilho","polvilh","farinha","farinh","far trigo","far mandioca","fuba","fubá","farofa","amido de milho","amido","fermento","ferment","trigo","semola","sêmola","miojo","lamen","massa de pastel","massa para pastel","massa folhada","massa fresca","massa de pizza","wafer","waffle"]],
+    ["🧀 Queijos / Laticínios", ["queijo","queij","qj ","qjo ","mussarela","muçarela","muçar","mussar","muss ","mozarela","mozzarela","requeijao","requeijão","requeij","ricota","parmesao","parmesão","parmes","provolone","gorgonzola","cheddar","catupiry","cream cheese","creme cheese","polenghi","minas frescal","queijo prato","qj prato","coalho","leite","lte ","leitin","leite condensado","leite cond","leite em po","leite em pó","leite ninho","iogurte","iog ","yogurte","danone","danoninho","activia","chambinho","manteiga","manteig","mantg","margarina","marg ","creme de leite","cr leite","cr lte","nata ","petit suisse","danette","sobremesa lactea","bebida lactea","coalhada","kefir"]],
+    ["🥤 Bebidas", ["refrigerante","refri","refrig","coca-cola","coca cola","pepsi","guarana","guaraná","fanta","sprite","schweppes","tonica","tônica","suco","sucos","del valle","sufresh","agua mineral","água mineral","agua min","agua com gas","agua de coco","água de coco","kero coco","cha ","chá","cha mate","cha verde","cha preto","mate leao","café","cafe ","capuccino","cappuccino","achocolatado","achocolat","nescau","toddy","cerveja","cerv ","chopp","vinho","espumante","whisky","vodka","cachaca","cachaça","energetico","energético","energetic","red bull","gatorade","isotonic","powerade"]],
+    ["🧴 Molhos / Temperos", ["oleo","óleo","azeite"," sal ","sal refinado","sal grosso","açucar","açúcar","acucar","acúcar","adocante","adoçante","vinagre","molho","ketchup","catchup","cat ","maionese","mostarda","tempero","sazon"," caldo ","extrato","extrato de tomate","tomate pelado","tom pelado","oregano","orégano","pimenta do reino","pim rei","pimenta calabresa","molho de pimenta","shoyu","colorau","colorif","cominho","canela","cravo","noz moscada","chinez","bicarb","bicarbonato","curry","açafrao","açafrão","louro","alecrim","glutamato","molho ingles","lemon pepper"]],
+    ["🥦 Hortifruti", ["alface","rucula","rúcula","couve","espinafre","acelga","repolho","brocolis","brócolis","couve-flor","couve flor","tomate","tomat","cebola","ceb ","cebolinha","alho","alho poro","salsa ","salsinha","coentro","manjericao","cenoura","cenour","beterraba","beterr","batata","abobora","abóbora","abobrinha","chuchu","pepino","berinjela","jilo","jiló","quiabo","pimentao","pimentão","vagem","milho verde","mandioca","aipim","macaxeira","inhame","gengibre","rabanete","abacate","banana","banan","laranja","laranj","limao","limão","tangerina","mexerica","ponkan"," pera ","uvas"," uva ","morango","abacaxi","melao","melão","melancia","mamao","mamão","manga","mang ","kiwi","ameixa","pessego","pêssego","goiaba","maracuja","maracujá","acerola","figo ","coco","fruta","verdura","legume","hortifruti","salada","cheiro verde"]],
+    ["🌾 Grãos / Cereais", ["arroz","arr ","feijao","feijão","feij","fj ","lentilha","lent ","grao de bico","grão de bico","grao bico","milho","mlho","canjica","aveia","granola","quinoa","quinua","gergelim","linhaca","linhaça","chia ","cevada","centeio","sucrilhos","cereal matinal","ervilha","soja em grao","proteina de soja","trigo para quibe","trigo para kibe"]],
+    ["🍪 Snacks / Doces", ["chocolate","choco","bombom","bala ","balas ","chiclete","salgadinho","batata frita","doritos","cheetos","ruffles","pipoca","amendoim","castanha","wafer","paçoca","pacoca","gelatina","sorvete","picole","picolé","brigadeiro","biscoito recheado","barra de cereal","barra de chocolate","kitkat","bis ","trident","halls","pirulito","marshmallow","doce de leite","goiabada","cocada","sonho de valsa","prestigio","oreo","negresco","cookie","mel ","geleia","geléia"]],
+    ["🧹 Limpeza / Higiene", ["sabao","sabão","sab po","detergente","deterg","amaciante","amacian","desinfet","desinfetante","sanitar","sanitár","agua sanitaria","cloro","candida","qboa","papel higien","papel higiê","ph ","sabonete","sbt ","shampoo","xampu","condicionador","creme dental","pasta de dente","gel dental","desodor","desodorante","absorvente","fralda","esponja","bombril","palha de aco","alcool","álcool","limpa ","veja ","lustra","multiuso","papel toalha","cotonete","lenco","lenço","fio dental","enxaguante","alvejante","talco","hidratante","protetor solar","gilete","lamina de barbear","sabonete liquido"]],
+    ["🏠 Utensílios / Casa", ["pilha","pilhas","bateria","lampada","lâmpada","vela ","velas ","fosforo","fósforo","saco de lixo","saco lixo","papel aluminio","papel alumínio","filme pvc","copo descart","prato descart","prato fundo","talher","garfo","faca ","colher","panela","frigideira","cafeteira","isqueiro","palito","palito de dente","vassoura","rodo ","balde","pregador","prendedor","papel manteiga","vela perfumada","fita adesiva","carvao"]]
   ];
   for(const pair of map){
     for(const w of pair[1]){ if(n.indexOf(w) >= 0) return pair[0]; }
   }
-  return CATEGORIES[0];
+  return "📦 Outros";
 }
 
 // Lê a nota fiscal (NFC-e). Cada item: "NOME (Código: NNNN) Vl. Total" numa linha
