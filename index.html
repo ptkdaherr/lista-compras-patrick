@@ -117,7 +117,11 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
 .cat-block{margin-bottom:10px}
 .cat-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--card);border-radius:10px 10px 0 0;cursor:pointer;user-select:none;border-bottom:1px solid var(--surface)}
 .cat-header.collapsed{border-radius:10px;border-bottom:none}
-.cat-header-left{display:flex;align-items:center;gap:8px}
+.cat-header-left{display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}
+.cat-header-right{display:flex;align-items:center;gap:10px;flex-shrink:0;margin-left:8px}
+.cat-checkall{background:var(--surface);border:1px solid var(--border);color:var(--text-3);font-family:inherit;font-size:10px;font-weight:600;padding:4px 9px;border-radius:20px;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s,border-color .15s}
+.cat-checkall:active{transform:scale(.95)}
+.cat-checkall.done{background:var(--green-bg);border-color:var(--green);color:var(--green)}
 .cat-emoji{font-size:15px}
 .cat-name{font-size:13px;font-weight:600;color:var(--text)}
 .cat-count{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600;background:var(--bg);color:var(--text-2)}
@@ -310,7 +314,7 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
 .empty-btn-main{padding:12px 24px;background:var(--text);color:var(--bg);border:none;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit}
 .empty-btn-sec{padding:12px 20px;background:transparent;color:var(--text-2);border:1.5px solid var(--border);border-radius:10px;font-size:13px;cursor:pointer;font-family:inherit}
 /* MANUAL LIST MODAL */
-#manual-list-modal .bs-panel,#nfimport-modal .bs-panel{max-height:90vh;overflow-y:auto;padding-bottom:40px}
+#manual-list-modal .bs-panel,#nfimport-modal .bs-panel{max-height:90vh;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding-bottom:40px}
 .ml-add-row{display:grid;grid-template-columns:1fr 48px 72px 36px;gap:6px;margin-bottom:10px;align-items:center}
 .ml-add-row .bs-input{padding:8px 10px;font-size:13px}
 .ml-add-btn{background:var(--text);color:var(--bg);border:none;border-radius:8px;font-size:18px;height:38px;cursor:pointer;display:flex;align-items:center;justify-content:center}
@@ -324,10 +328,10 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
 .lc-card{background:var(--card);border-radius:14px;margin-bottom:12px;border:1.5px solid var(--border);overflow:hidden;transition:border-color .15s,box-shadow .15s}
 .lc-card.active{border-color:var(--accent)}
 .lc-card.expanded{box-shadow:0 6px 24px rgba(42,31,16,.08)}
-.lc-header{display:flex;align-items:center;gap:8px;padding:14px 16px}
-.lc-name-input{flex:1;min-width:0;font-size:15px;font-weight:600;color:var(--text);background:none;border:none;outline:none;font-family:inherit;border-bottom:1.5px solid transparent;padding:2px 0}
+.lc-header{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;padding:14px 16px}
+.lc-name-input{flex:1 1 100%;min-width:0;font-size:15px;font-weight:600;color:var(--text);background:none;border:none;outline:none;font-family:inherit;border-bottom:1.5px solid transparent;padding:2px 0}
 .lc-name-input:focus{border-bottom-color:var(--accent)}
-.lc-expand-trigger{display:flex;align-items:center;gap:8px;cursor:pointer;padding:4px 0 4px 8px;flex-shrink:0}
+.lc-expand-trigger{display:flex;align-items:center;gap:8px;cursor:pointer;padding:2px 0;flex-shrink:0;margin-left:auto}
 .lc-count{font-size:11px;color:var(--text-3);white-space:nowrap}
 .lc-badge{font-size:9px;font-weight:700;color:var(--accent);background:var(--accent-bg);padding:3px 8px;border-radius:10px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
 .lc-arrow{color:var(--text-3);font-size:11px;transition:transform .2s;flex-shrink:0}
@@ -676,13 +680,13 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
       <div class="bs-field">
         <label class="bs-label">Nome desta nota</label>
         <input id="nfi-list-name" class="bs-input" placeholder="Dê um nome para esta nota">
-        <div class="nfi-hint">Vamos criar uma <strong>lista nova</strong> só com esses itens. Suas outras listas não mudam.</div>
+        <div class="nfi-hint">Como é uma compra que já passou, ela vai direto pras <strong>Listas Salvas</strong> (Histórico). Sua lista de compras do início não muda.</div>
       </div>
       <div class="nfi-found" id="nfi-found"></div>
       <div id="nfi-items"></div>
       <div class="bs-btns">
         <button class="bs-btn-cancel" onclick="closeNfImport()">Cancelar</button>
-        <button class="bs-btn-save" onclick="confirmNfImport()">Criar lista da nota</button>
+        <button class="bs-btn-save" onclick="confirmNfImport()">Salvar nas Listas Salvas</button>
       </div>
     </div>
   </div>
@@ -1481,9 +1485,9 @@ function renderComoImportarTab(){
       <li><strong>Abra a nota.</strong> Toque em <em>Abrir nota fiscal</em> — abre a página da Fazenda com todos os itens.</li>
       <li><strong>Salve a página como PDF</strong> (no menu do navegador → Imprimir/Compartilhar → Salvar como PDF). Assim os valores saem certinhos. <span class="lt-print-tip">Se preferir, dá pra tirar um print — só confira os valores depois.</span></li>
       <li><strong>Volte ao app</strong>, na aba <em>Notas escaneadas</em>.</li>
-      <li><strong>Toque em <em>Importar a nota</em></strong> e envie o PDF ou o print. Confira os itens e pronto: vira uma <strong>lista nova, separada</strong>.</li>
+      <li><strong>Toque em <em>Importar a nota</em></strong> e envie o PDF ou o print. Confira os itens e pronto: vira uma compra nas suas <strong>Listas Salvas</strong>.</li>
     </ol>
-    <div style="margin-top:6px">${importActionsCard()}</div>`;
+    <div style="margin-top:14px;font-size:12px;color:var(--text-2);background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:11px 13px;line-height:1.5">Os botões <strong>Ler QR da nota</strong> e <strong>Importar a nota</strong> ficam na aba <strong>Notas escaneadas</strong>. ↑</div>`;
 }
 function renderListasView(){
   const el = document.getElementById("listas-view-content");
@@ -1758,6 +1762,59 @@ async function pdfPageToBlob(pdf){
 function nfiTitleCase(s){
   return s.toLowerCase().replace(/\b([a-zà-ÿ])([a-zà-ÿ']*)/g, (m,a,b) => a.toUpperCase()+b).trim();
 }
+// Expande os nomes BEM abreviados da nota fiscal para o nome por extenso e legível.
+// "QJ MUSS" -> "Queijo Mussarela", "P FGO CONG" -> "Peito de Frango Congelado",
+// "TOM PELADO" -> "Tomate Pelado", "BICARB" -> "Bicarbonato". Marcas (Friboi, Qualy,
+// Chinezinho...) ficam intactas; códigos de embalagem (ex.: L12P11) são removidos.
+// Frases (várias palavras) são aplicadas primeiro; depois tokens isolados (match EXATO,
+// nunca pedaço de palavra) — evita trocar "lt"(litro) por leite ou "min"(mineral) por minas.
+const NF_PHRASES = [
+  ["p fgo cong","peito de frango congelado"],["peito fgo def","peito de frango defumado"],
+  ["fgo cong","frango congelado"],["frg cong","frango congelado"],
+  ["p fgo","peito de frango"],["peito fgo","peito de frango"],["fil fgo","filé de frango"],["file fgo","filé de frango"],["asa fgo","asa de frango"],
+  ["car moid","carne moída"],["carn moid","carne moída"],["car moida","carne moída"],["car seca","carne seca"],["car sol","carne de sol"],
+  ["fil mignon","filé mignon"],["file mignon","filé mignon"],
+  ["post tilap","posta de tilápia"],["fil tilap","filé de tilápia"],["file tilap","filé de tilápia"],["fil salm","filé de salmão"],["fil merl","filé de merluza"],
+  ["cr leite","creme de leite"],["cr lte","creme de leite"],["creme lte","creme de leite"],
+  ["lte cond","leite condensado"],["lt cond","leite condensado"],["leite cond","leite condensado"],
+  ["lte int","leite integral"],["lt int","leite integral"],["lte desn","leite desnatado"],["lte po","leite em pó"],["lt po","leite em pó"],
+  ["qj muss","queijo mussarela"],["qj proc","queijo processado"],["qj prato","queijo prato"],["qj ral","queijo ralado"],["qj min","queijo minas"],["qj coal","queijo coalho"],["qj prov","queijo provolone"],
+  ["pim rei","pimenta do reino"],["pim reino","pimenta do reino"],
+  ["sal ref","sal refinado"],["sal gros","sal grosso"],
+  ["feij pto","feijão preto"],["feij car","feijão carioca"],["feij carioca","feijão carioca"],
+  ["agua min","água mineral"],["sab po","sabão em pó"],["sabao po","sabão em pó"],
+  ["molho tom","molho de tomate"],["ext tom","extrato de tomate"],["extr tomate","extrato de tomate"],["noz mosc","noz moscada"],
+];
+const NF_TOKENS = {
+  qj:"queijo",qjo:"queijo",lte:"leite",marg:"margarina",mant:"manteiga",mtga:"manteiga",
+  muss:"mussarela","muçar":"mussarela",requeij:"requeijão",req:"requeijão",iog:"iogurte",
+  feij:"feijão",pto:"preto",car:"carne",carn:"carne",moid:"moída",moida:"moída",
+  fgo:"frango",frg:"frango",frang:"frango",tilap:"tilápia",salm:"salmão",camar:"camarão",merl:"merluza",bacalh:"bacalhau",sard:"sardinha",
+  cong:"congelado",congel:"congelado",ft:"fatiado",fat:"fatiado",def:"defumado",defum:"defumado",
+  int:"integral",desn:"desnatado",proc:"processado",ral:"ralado",resfr:"resfriado",
+  tom:"tomate",bicarb:"bicarbonato",colorif:"colorífico",pim:"pimenta",cat:"catchup",
+  ph:"papel higiênico",sbt:"sabonete",deterg:"detergente",amac:"amaciante",desinf:"desinfetante",
+  refrig:"refrigerante",refri:"refrigerante",
+  orig:"original",origin:"original",nac:"nacional",trad:"tradicional",lav:"lavada",
+  acucar:"açúcar",limao:"limão",mamao:"mamão",pao:"pão",oleo:"óleo",agua:"água",cafe:"café",sabao:"sabão",feijao:"feijão",
+};
+function expandNfName(raw){
+  if(!raw) return "";
+  let s = " " + raw.toLowerCase().replace(/[()]/g," ").replace(/\s+/g," ").trim() + " ";
+  s = s.replace(/\bs\//g, " sem ");                                   // "s/açúcar" -> "sem açúcar"
+  for(const p of NF_PHRASES){ s = s.split(" "+p[0]+" ").join(" "+p[1]+" "); }
+  const out = [];
+  for(const t of s.trim().split(" ")){
+    if(!t) continue;
+    if(t.indexOf("/") >= 0) continue;                                 // descarta códigos tipo c/s, c/t
+    if(NF_TOKENS[t]){ out.push(NF_TOKENS[t]); continue; }
+    if(/\d/.test(t) && /[a-zà-ÿ]/.test(t) && !/^\d+([.,]\d+)?(g|gr|kg|k|ml|l|lt|un|und|m|cm|mm|cx|pc|pct|pt|dz|du|fd|rl)$/.test(t)) continue; // código de embalagem
+    out.push(t);
+  }
+  let r = out.join(" ").replace(/\b([a-zà-ÿ])([a-zà-ÿ'’-]*)/g, (m,a,b)=>a.toUpperCase()+b).replace(/\s+/g," ").trim();
+  r = r.replace(/\b(De|Do|Da|Dos|Das|E|Em|Com|Sem)\b/g, m => m.toLowerCase());   // conectores em minúsculo
+  return r ? r.charAt(0).toUpperCase() + r.slice(1) : r;
+}
 // Adivinha a categoria pelo nome do item. Funciona até com os nomes BEM abreviados
 // das notas fiscais (NFC-e): "QJ MUSS" (queijo), "LTE INT" (leite), "FEIJ PTO" (feijão),
 // "MARG" (margarina), "SBT" (sabonete), "PH" (papel higiênico), "CAR MOID" (carne moída)...
@@ -1841,7 +1898,7 @@ function parseNotaText(raw){
     }
     if(price != null && (!isFinite(price) || price <= 0)) price = null;
     if(price != null) price = Math.round(price*100)/100;
-    items.push({ name: nfiTitleCase(name), qty:1, price, cat: guessCat(name), include:true });
+    items.push({ name: expandNfName(name), qty:1, price, cat: guessCat(name), include:true });
   }
   return items;
 }
@@ -1878,30 +1935,20 @@ function confirmNfImport(){
   if(!toAdd.length){ showToast("Nenhum item selecionado"); return; }
   const nameInput = document.getElementById("nfi-list-name");
   const name = (nameInput && nameInput.value.trim()) || ("Nota fiscal — " + fmtDateBR(new Date()));
-  const id = "l" + Date.now();
-  const newList = {
-    id,
-    name,
-    source: "scan",
-    scannedAt: Date.now(),
-    items: toAdd.map(si => ({
-      id: Date.now()+Math.random(),
-      name: (si.name||"").trim(),
-      cat: si.cat || CATEGORIES[0],
-      checked: false,
-      freq: 1,
-      qty: si.qty || 1,
-      old: (si.price!=null && isFinite(si.price)) ? si.price : null,
-      cur: null
-    }))
-  };
-  lists.push(newList);
-  localStorage.setItem(LISTS_KEY, JSON.stringify(lists));
+  // A nota é uma compra que JÁ aconteceu, então vai direto pras Listas Salvas (Histórico),
+  // não pra lista de compras do início (que é pra marcar o que ainda falta comprar).
+  const histItems = toAdd.map(si => ({
+    name: (si.name||"").trim(),
+    cat: si.cat || "📦 Outros",
+    qty: si.qty || 1,
+    old: (si.price!=null && isFinite(si.price)) ? si.price : null,
+    cur: null
+  }));
+  const today = new Date().toISOString().split("T")[0];
+  pushToHistory(histItems, name, today, { scanned: true });
   closeNfImport();
-  listasTab = "escaneadas";   // ao voltar pra Minhas Listas, mostra a aba das notas
-  switchList(id);             // torna a nota a lista ativa...
-  switchView("lista");        // ...e abre pra conferir os itens
-  showToast("✓ Nota importada! Criamos \"" + name + "\"");
+  switchView("historico");
+  showToast("✓ Nota salva nas Listas Salvas!");
 }
 
 /* ── SIDEBAR ── */
@@ -2154,6 +2201,13 @@ function confirmAdd(){
 function toggleCat(cat){
   collapsed[cat] = !collapsed[cat]; render();
 }
+function toggleCatAll(cat){
+  const inCat = items.filter(i => i.cat===cat);
+  if(!inCat.length) return;
+  const allDone = inCat.every(i => i.checked);   // se já estão todos marcados, desmarca; senão marca todos
+  items = items.map(i => i.cat===cat ? {...i, checked:!allDone} : i);
+  save(); render();
+}
 
 function render(){
   updateListSwitcherLabel();
@@ -2235,7 +2289,10 @@ function render(){
         ${catTotal>0?`<span style="font-size:10px;color:var(--accent);font-family:monospace">${fmt(catTotal)}</span>`:""}
         ${catPctBadge}
       </div>
-      <span class="cat-arrow${isCol?" collapsed":""}">▼</span>
+      <div class="cat-header-right">
+        <button class="cat-checkall${allDone?" done":""}" onclick="event.stopPropagation();toggleCatAll('${cat.replace(/'/g,"\\'")}')" title="${allDone?'Desmarcar todos desta seção':'Marcar todos desta seção'}">${allDone?"✓ todos":"marcar todos"}</button>
+        <span class="cat-arrow${isCol?" collapsed":""}">▼</span>
+      </div>
     </div><div class="cat-items${isCol?" hidden":""}">`;
 
     catItems.forEach(item => {
@@ -2390,7 +2447,7 @@ function renderCatalogo(){
 }
 
 /* ── HISTÓRICO ── */
-function pushToHistory(sourceItems, name, date){
+function pushToHistory(sourceItems, name, date, extra){
   const history = JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]");
   const total = sourceItems.reduce((a,i) => {
     const p = i.cur!=null ? i.cur : (i.old!=null ? i.old : 0);
@@ -2402,7 +2459,8 @@ function pushToHistory(sourceItems, name, date){
     date: date || new Date().toISOString().split("T")[0],
     savedAt: new Date().toISOString(),
     items: sourceItems.map(i => ({name:i.name, qty:i.qty||1, price:i.cur!=null?i.cur:i.old, cat:i.cat})),
-    total
+    total,
+    ...(extra||{})
   });
   localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0,30)));
 }
@@ -2595,7 +2653,7 @@ function renderHistorico(){
       <div class="hist-session-body${isOpen?" open":""}">
         <div style="padding:6px 16px 4px;display:flex;justify-content:space-between;align-items:center">
           <span style="font-size:10px;color:var(--text-3)">${(session.items||[]).length} itens · ${fmtDate(session.date)}</span>
-          ${session.manual?`<span style="font-size:9px;padding:2px 6px;background:var(--accent-bg);color:var(--accent);border-radius:8px;font-weight:600">inserida</span>`:""}
+          ${session.scanned?`<span style="font-size:9px;padding:2px 6px;background:var(--accent-bg);color:var(--accent);border-radius:8px;font-weight:600">📷 da nota</span>`:session.manual?`<span style="font-size:9px;padding:2px 6px;background:var(--accent-bg);color:var(--accent);border-radius:8px;font-weight:600">inserida</span>`:""}
         </div>`;
 
     if(editing){
@@ -2872,6 +2930,37 @@ CATEGORIES.forEach(c => {
 loadCatalogOverrides();
 applyTheme(document.documentElement.getAttribute("data-theme") || "light");
 render();
+
+/* ── TRAVA O SCROLL DO FUNDO ENQUANTO UM MODAL (bottom-sheet) ESTÁ ABERTO ── */
+/* Antes, ao abrir a tela de conferir a nota, o scroll mexia a página de trás em vez
+   do modal, e só dava pra sair pelo botão de baixo. Aqui travamos o corpo (position:
+   fixed, à prova de iOS) sempre que houver um .bottom-sheet aberto, e devolvemos a
+   posição ao fechar. */
+(function(){
+  let lockedY = 0, locked = false;
+  function sync(){
+    const anyOpen = !!document.querySelector(".bottom-sheet.open");
+    if(anyOpen && !locked){
+      lockedY = window.scrollY || window.pageYOffset || 0;
+      document.body.style.position = "fixed";
+      document.body.style.top = (-lockedY) + "px";
+      document.body.style.left = "0";
+      document.body.style.right = "0";
+      document.body.style.width = "100%";
+      locked = true;
+    } else if(!anyOpen && locked){
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
+      document.body.style.width = "";
+      locked = false;
+      window.scrollTo(0, lockedY);
+    }
+  }
+  const obs = new MutationObserver(sync);
+  document.querySelectorAll(".bottom-sheet").forEach(el => obs.observe(el, { attributes:true, attributeFilter:["class"] }));
+})();
 
 /* ── SCROLL COMPACT HEADER ── */
 function updateCompactStat(){
