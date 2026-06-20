@@ -259,6 +259,27 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
 /* SAVE MODAL */
 .bottom-sheet{position:fixed;inset:0;z-index:150;display:none}
 .bottom-sheet.open{display:block}
+/* IMPORTAR NOTA (FOTO/PDF) */
+.nfi-intro{font-size:13px;color:var(--text-2);line-height:1.55;margin-bottom:6px}
+.nfi-steps{list-style:none;padding:0;margin:12px 0 16px;counter-reset:nfi}
+.nfi-steps li{position:relative;padding:6px 0 6px 30px;font-size:12.5px;color:var(--text-2);line-height:1.45}
+.nfi-steps li::before{counter-increment:nfi;content:counter(nfi);position:absolute;left:0;top:5px;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.nfi-processing{text-align:center;padding:34px 0}
+.nfi-spin{font-size:30px;margin-bottom:12px;animation:nfi-pulse 1.2s ease-in-out infinite}
+@keyframes nfi-pulse{0%,100%{opacity:.35}50%{opacity:1}}
+.nfi-prog{margin-top:10px;font-size:12px;color:var(--text-3)}
+.nfi-bar{height:6px;border-radius:6px;background:var(--surface);overflow:hidden;margin:14px 30px 0}
+.nfi-bar-fill{height:100%;width:0;background:var(--accent);transition:width .25s}
+.nfi-found{font-size:12px;color:var(--text-3);margin:2px 0 12px;line-height:1.45}
+.nfi-rowwrap{background:var(--surface);border-radius:10px;padding:9px 10px;margin-bottom:8px;transition:opacity .15s}
+.nfi-rowwrap.off{opacity:.42}
+.nfi-row{display:flex;align-items:center;gap:7px}
+.nfi-row input[type=checkbox]{width:18px;height:18px;flex-shrink:0;accent-color:var(--accent)}
+.nfi-name{flex:1;min-width:0}
+.nfi-qty{width:40px;text-align:center;flex-shrink:0}
+.nfi-price{width:78px;flex-shrink:0}
+.nfi-rowwrap .bs-input{padding:7px 8px;font-size:13px;background:var(--bg)}
+.nfi-catsel{margin-top:7px;font-size:12px;padding:6px 8px;appearance:auto}
 .bs-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.5)}
 .bs-panel{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:var(--card);border-radius:18px 18px 0 0;padding:20px 20px 36px;box-shadow:0 -8px 40px rgba(0,0,0,.15)}
 .bs-handle{width:36px;height:4px;background:var(--border);border-radius:4px;margin:0 auto 20px}
@@ -279,7 +300,7 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
 .empty-btn-main{padding:12px 24px;background:var(--text);color:var(--bg);border:none;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit}
 .empty-btn-sec{padding:12px 20px;background:transparent;color:var(--text-2);border:1.5px solid var(--border);border-radius:10px;font-size:13px;cursor:pointer;font-family:inherit}
 /* MANUAL LIST MODAL */
-#manual-list-modal .bs-panel{max-height:90vh;overflow-y:auto;padding-bottom:40px}
+#manual-list-modal .bs-panel,#nfimport-modal .bs-panel{max-height:90vh;overflow-y:auto;padding-bottom:40px}
 .ml-add-row{display:grid;grid-template-columns:1fr 48px 72px 36px;gap:6px;margin-bottom:10px;align-items:center}
 .ml-add-row .bs-input{padding:8px 10px;font-size:13px}
 .ml-add-btn{background:var(--text);color:var(--bg);border:none;border-radius:8px;font-size:18px;height:38px;cursor:pointer;display:flex;align-items:center;justify-content:center}
@@ -316,14 +337,47 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
 .lc-add-btn.added{background:var(--green)}
 .lc-empty-msg{text-align:center;color:var(--text-3);font-size:12px;padding:14px 0}
 .hist-header-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 4px}
-.hist-add-prev-btn{background:var(--surface);border:1.5px solid var(--border);color:var(--text-2);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap}
+.hist-add-prev-btn{background:var(--surface);border:1.5px solid var(--border);color:var(--text-2);border-radius:8px;padding:9px 13px;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap}
 .hist-add-prev-btn:active{border-color:var(--accent);color:var(--accent)}
 /* HIST EDIÇÃO */
 .hist-name-input{background:none;border:none;border-bottom:1.5px solid var(--accent);outline:none;font-family:inherit;font-size:14px;font-weight:500;color:var(--text);width:100%;padding:2px 0;margin-bottom:2px}
 .hist-date-input{font-size:11px;color:var(--text-2);padding:2px 0;background:none;border:none;border-bottom:1px solid var(--border);outline:none;font-family:inherit;color-scheme:light}
 .hist-session-actions{display:flex;gap:4px;margin-left:4px;flex-shrink:0}
-.hist-act-btn{background:none;border:none;cursor:pointer;padding:5px 6px;border-radius:6px;font-size:14px;color:var(--text-3);transition:all .15s}
+.hist-act-btn{background:none;border:none;cursor:pointer;padding:7px 9px;min-width:36px;border-radius:6px;font-size:14px;color:var(--text-3);transition:all .15s}
 .hist-act-btn:hover{color:var(--red);background:var(--red-bg)}
+.hist-act-btn.hist-edit-btn:hover{color:var(--accent);background:var(--accent-bg)}
+.hist-act-btn.hist-edit-btn.on{color:var(--accent);background:var(--accent-bg)}
+/* SUB-ABAS DE MINHAS LISTAS */
+.lt-tabs{display:flex;gap:6px;margin-bottom:16px}
+.lt-tab{flex:1;padding:9px 4px;border-radius:9px;border:1.5px solid var(--border);background:var(--card);color:var(--text-2);font-size:11px;font-weight:600;cursor:pointer;text-align:center;line-height:1.2;font-family:inherit;transition:all .15s;min-height:44px}
+.lt-tab.active{background:var(--text);color:var(--bg);border-color:var(--text)}
+.lt-empty{text-align:center;color:var(--text-2);font-size:12.5px;line-height:1.6;padding:22px 12px;background:var(--surface);border-radius:12px;border:1px dashed var(--border)}
+/* CARD DE IMPORTAR NOTA (aba Notas escaneadas / Como importar) */
+.lt-import-actions{background:var(--accent-bg);border:1.5px solid var(--accent);border-radius:14px;padding:14px}
+.lt-import-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px}
+.lt-import-btns{display:flex;gap:8px}
+.lt-imp-btn{flex:1;display:flex;align-items:center;gap:8px;padding:11px 10px;border-radius:10px;border:1.5px solid var(--accent);background:var(--card);color:var(--text);font-family:inherit;cursor:pointer;text-align:left}
+.lt-imp-btn.primary{background:var(--text);color:var(--bg);border-color:var(--text)}
+.lt-imp-btn.primary .lt-imp-tx small{color:var(--bg);opacity:.72}
+.lt-imp-ic{font-size:18px;flex-shrink:0}
+.lt-imp-tx{display:flex;flex-direction:column;min-width:0}
+.lt-imp-tx strong{font-size:12.5px;line-height:1.2}
+.lt-imp-tx small{font-size:10px;color:var(--text-2);line-height:1.25;margin-top:2px}
+.lt-help-link{margin-top:10px;background:none;border:none;color:var(--accent);font-size:11.5px;font-weight:600;cursor:pointer;font-family:inherit;padding:2px 0}
+.lt-print-tip{display:block;font-size:10.5px;color:var(--text-2);margin-top:3px}
+/* CARDS DE NOTA ESCANEADA */
+.lc-origin-badge{color:var(--text-2);background:var(--surface)}
+.lc-scanned-date{font-size:10px;color:var(--text-2);padding:0 16px 8px;margin-top:-4px}
+.nfi-hint{font-size:11px;color:var(--text-3);margin-top:6px;line-height:1.4}
+/* LINHAS EDITÁVEIS DA COMPRA SALVA */
+.hist-item-edit{display:flex;align-items:center;gap:6px;padding:5px 12px 5px 16px}
+.hist-item-edit input{border:1.5px solid var(--border);border-radius:7px;padding:6px 8px;font-size:12px;font-family:inherit;background:var(--bg);color:var(--text);outline:none}
+.hist-item-edit input:focus{border-color:var(--accent)}
+.hist-edit-name{flex:1;min-width:0}
+.hist-edit-qty{width:46px;text-align:center;flex-shrink:0}
+.hist-edit-price{width:76px;flex-shrink:0}
+.hist-edit-foot{padding:8px 16px 6px;display:flex;align-items:center;gap:8px}
+.hist-edit-hint{font-size:10px;color:var(--text-3)}
 /* METRICS DATE FILTER */
 .mdf-box{background:var(--card);border-radius:12px;padding:14px 16px;margin-bottom:16px;border:1px solid var(--border)}
 .mdf-title{font-size:10px;color:var(--text-2);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
@@ -464,16 +518,13 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
 </div>
 
 <div id="view-listas" class="view">
-  <div style="padding:16px">
-    <div class="section-label" style="margin-bottom:10px">Suas listas</div>
-    <div id="listas-view-content"></div>
-    <div class="bs-field" style="margin-top:18px">
-      <label class="bs-label">Criar nova lista</label>
-      <div style="display:flex;gap:8px">
-        <input id="new-list-name" class="bs-input" style="margin-bottom:0" placeholder="Ex: Churrasco, Viagem..." onkeydown="if(event.key==='Enter')confirmCreateList()">
-        <button class="btn-confirm" style="white-space:nowrap;padding:0 18px;border-radius:8px" onclick="confirmCreateList()">+ Criar</button>
-      </div>
+  <div style="padding:14px 16px 18px">
+    <div class="lt-tabs">
+      <button class="lt-tab active" data-lt="criadas" onclick="setListasTab('criadas')">Minhas listas</button>
+      <button class="lt-tab" data-lt="escaneadas" onclick="setListasTab('escaneadas')">Notas escaneadas</button>
+      <button class="lt-tab" data-lt="como" onclick="setListasTab('como')">Como importar</button>
     </div>
+    <div id="listas-view-content"></div>
   </div>
 </div>
 
@@ -560,8 +611,9 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
     </div>
 
     <div id="qr-step-result" style="display:none">
-      <p>QR code lido! Esse link leva direto pra nota fiscal na Receita do seu estado, com todos os itens e valores.</p>
+      <p>QR lido! Esse link abre a nota fiscal no site da Receita do seu estado, com todos os itens e valores.</p>
       <div id="qr-result-link" style="font-size:11px;color:var(--text-2);background:var(--surface);border-radius:8px;padding:10px 12px;word-break:break-all;margin-bottom:4px"></div>
+      <p style="font-size:12px;color:var(--text-2);margin-top:10px;line-height:1.5">Depois de abrir, <strong>tire um print</strong> (ou salve em PDF) e volte em <strong>Notas escaneadas → Importar a nota</strong> para trazer os itens.</p>
     </div>
 
     <canvas id="qr-canvas" style="display:none"></canvas>
@@ -572,6 +624,49 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
     <div class="bs-btns" id="qr-btns-result" style="display:none">
       <button class="bs-btn-cancel" onclick="closeQrModal()">Fechar</button>
       <button class="bs-btn-save" onclick="openQrResultLink()">Abrir nota fiscal</button>
+    </div>
+  </div>
+</div>
+
+<div id="nfimport-modal" class="bottom-sheet">
+  <div class="bs-backdrop" onclick="closeNfImport()"></div>
+  <div class="bs-panel">
+    <div class="bs-handle"></div>
+    <div class="bs-title">Importar itens da nota</div>
+
+    <div id="nfi-step-upload">
+      <p class="nfi-intro">Tirou um print (ou salvou em PDF) da nota fiscal aberta no site do governo? Envie aqui que o app lê os itens e os valores pra você.</p>
+      <ol class="nfi-steps">
+        <li>Em <strong>Notas escaneadas</strong>, toque em <strong>Ler QR da nota</strong> e leia o QR do cupom.</li>
+        <li>Toque em <strong>Abrir nota fiscal</strong> — abre a página do governo com a lista de produtos.</li>
+        <li>Tire um <strong>print</strong> dessa tela (ou salve a página como PDF).</li>
+        <li>Volte aqui e envie a imagem ou o PDF. Você confere tudo antes de adicionar.</li>
+      </ol>
+      <input type="file" id="nfi-file-input" accept="image/*,application/pdf" style="display:none" onchange="handleNfFile(event)">
+      <button class="btn-confirm" style="width:100%;padding:13px;border-radius:10px;font-size:14px" onclick="document.getElementById('nfi-file-input').click()">📷 Enviar print ou PDF da nota</button>
+    </div>
+
+    <div id="nfi-step-processing" style="display:none">
+      <div class="nfi-processing">
+        <div class="nfi-spin">🔍</div>
+        <div>Lendo a nota...</div>
+        <div class="nfi-bar"><div class="nfi-bar-fill" id="nfi-bar-fill"></div></div>
+        <div class="nfi-prog" id="nfi-prog">Preparando...</div>
+      </div>
+    </div>
+
+    <div id="nfi-step-review" style="display:none">
+      <div class="bs-field">
+        <label class="bs-label">Nome desta nota</label>
+        <input id="nfi-list-name" class="bs-input" placeholder="Dê um nome para esta nota">
+        <div class="nfi-hint">Vamos criar uma <strong>lista nova</strong> só com esses itens. Suas outras listas não mudam.</div>
+      </div>
+      <div class="nfi-found" id="nfi-found"></div>
+      <div id="nfi-items"></div>
+      <div class="bs-btns">
+        <button class="bs-btn-cancel" onclick="closeNfImport()">Cancelar</button>
+        <button class="bs-btn-save" onclick="confirmNfImport()">Criar lista da nota</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1081,9 +1176,11 @@ let manualListItems = [];
 let currentView = "lista";
 let toastTimer = null;
 let expandedSessions = {};
+let editingSessions = {};
 let expandedListId = null;
 let lcSearchMode = "catalogo";
 let lcSearchQuery = "";
+let listasTab = "criadas";
 let metricPeriod = "30";
 let metricDateFrom = "";
 let metricDateTo = "";
@@ -1134,12 +1231,20 @@ function renameList(id, val){
   renderListasView();
   updateListSwitcherLabel();
 }
+function isScannedList(l){ return l && l.source === "scan"; }
+function canDeleteList(l){
+  if(!l) return false;
+  if(isScannedList(l)) return true;                                  // notas: apagar à vontade
+  return lists.filter(x => !isScannedList(x)).length > 1;            // criadas: manter ao menos 1
+}
 function deleteList(id){
-  if(lists.length <= 1){ showToast("Precisa ter ao menos 1 lista"); return; }
+  const l = getListById(id);
+  if(!canDeleteList(l)){ showToast("Precisa ter ao menos 1 lista criada"); return; }
   lists = lists.filter(l => l.id!==id);
   localStorage.setItem(LISTS_KEY, JSON.stringify(lists));
   if(activeListId===id){
-    activeListId = lists[0].id;
+    const fallback = lists.find(x => !isScannedList(x)) || lists[0];
+    activeListId = fallback.id;
     localStorage.setItem(ACTIVE_LIST_KEY, activeListId);
     items = (activeList().items || []).map(i => ({ qty:1, ...i }));
     updateListSwitcherLabel();
@@ -1153,7 +1258,9 @@ function importItemsToActive(sourceItems){
     if(idx !== -1){
       items[idx] = {...items[idx], qty:(items[idx].qty||1)+(si.qty||1)};
     } else {
-      items.push({id:Date.now()+Math.random(), name:si.name, cat:si.cat||CATEGORIES[0], checked:false, freq:1, qty:si.qty||1, old:si.price!=null?si.price:null, cur:null});
+      const price = si.price!=null ? si.price : (si.old!=null ? si.old : null);   // tolera itens com .price (histórico) ou .old (listas)
+      const cat = CATEGORIES.includes(si.cat) ? si.cat : CATEGORIES[0];           // garante categoria válida (senão o item some das telas)
+      items.push({id:Date.now()+Math.random(), name:si.name, cat, checked:false, freq:1, qty:si.qty||1, old:(price!=null && isFinite(price))?price:null, cur:null});
     }
   });
   save(); render();
@@ -1275,39 +1382,99 @@ function renderLcResults(){
       </div>`).join("");
   }
 }
+function setListasTab(t){
+  listasTab = t;
+  expandedListId = null;
+  renderListasView();
+  window.scrollTo(0,0);
+}
+function fmtDateBR(d){
+  const p = n => String(n).padStart(2,"0");
+  return p(d.getDate())+"/"+p(d.getMonth()+1)+"/"+d.getFullYear();
+}
+function renderListCard(l){
+  const isActive = l.id===activeListId;
+  const isExpanded = l.id===expandedListId;
+  const scanned = isScannedList(l);
+  const safeNameAttr = l.name.replace(/"/g,'&quot;');
+  const dateLine = (scanned && l.scannedAt) ? `<div class="lc-scanned-date">📷 Escaneada em ${fmtDateBR(new Date(l.scannedAt))}</div>` : "";
+  const actions = [];
+  if(!isActive) actions.push(`<button class="hist-add-prev-btn" onclick="useList('${l.id}')">${scanned?"Abrir":"Usar"}</button>`);
+  if(canDeleteList(l)) actions.push(`<button class="hist-act-btn" onclick="deleteList('${l.id}')" title="Excluir lista">🗑</button>`);
+  return `<div class="lc-card${isActive?" active":""}${isExpanded?" expanded":""}">
+    <div class="lc-header">
+      <input class="lc-name-input" value="${safeNameAttr}"
+        onblur="renameList('${l.id}',this.value)"
+        onkeydown="if(event.key==='Enter')this.blur()">
+      <div class="lc-expand-trigger" onclick="toggleExpandList('${l.id}')">
+        <span class="lc-count" id="lc-count-${l.id}">${(l.items||[]).length} itens</span>
+        ${isActive?'<span class="lc-badge">ativa</span>':""}
+        ${scanned?'<span class="lc-badge lc-origin-badge">da nota</span>':""}
+        <span class="lc-arrow${isExpanded?" open":""}">▾</span>
+      </div>
+    </div>
+    ${dateLine}
+    <div class="lc-actions" onclick="event.stopPropagation()">${actions.join("")}</div>
+    ${isExpanded?`<div class="lc-body">
+      <div class="lc-mode-pills">
+        <button class="lc-mode-pill${lcSearchMode==="catalogo"?" active":""}" onclick="setLcSearchMode('catalogo')">🔍 Buscar no catálogo</button>
+        <button class="lc-mode-pill${lcSearchMode==="lista"?" active":""}" onclick="setLcSearchMode('lista')">📝 Itens desta lista</button>
+      </div>
+      <input id="lc-search-input" class="lc-search" placeholder="${lcSearchMode==="catalogo"?"Buscar produto no catálogo...":"Buscar nos itens desta lista..."}" value="${lcSearchQuery.replace(/"/g,"&quot;")}" oninput="onLcSearchInput(this.value)">
+      <div id="lc-results"></div>
+    </div>`:""}
+  </div>`;
+}
+function importActionsCard(){
+  return `<div class="lt-import-btns">
+    <button class="lt-imp-btn" onclick="openQrModal()"><span class="lt-imp-ic">🧾</span><span class="lt-imp-tx"><strong>Ler QR da nota</strong><small>abre o site da Fazenda</small></span></button>
+    <button class="lt-imp-btn primary" onclick="openNfImport()"><span class="lt-imp-ic">📷</span><span class="lt-imp-tx"><strong>Importar a nota</strong><small>envie o print ou PDF</small></span></button>
+  </div>`;
+}
+function renderCriadasTab(){
+  const criadas = lists.filter(l => !isScannedList(l));
+  let html = `<div class="section-label" style="margin-bottom:10px">Listas criadas${criadas.length?` · ${criadas.length}`:""}</div>`;
+  html += criadas.length ? criadas.map(renderListCard).join("")
+    : `<div class="lt-empty">Você ainda não criou nenhuma lista.<br>Crie a primeira aqui embaixo. 👇</div>`;
+  html += `<div class="bs-field" style="margin-top:18px">
+    <label class="bs-label">Criar nova lista</label>
+    <div style="display:flex;gap:8px">
+      <input id="new-list-name" class="bs-input" style="margin-bottom:0" placeholder="Ex: Churrasco, Viagem..." onkeydown="if(event.key==='Enter')confirmCreateList()">
+      <button class="btn-confirm" style="white-space:nowrap;padding:0 18px;border-radius:8px" onclick="confirmCreateList()">+ Criar</button>
+    </div>
+  </div>`;
+  return html;
+}
+function renderEscaneadasTab(){
+  const escaneadas = lists.filter(isScannedList).sort((a,b) => (b.scannedAt||0)-(a.scannedAt||0));
+  let html = `<div class="lt-import-actions">
+    <div class="lt-import-title">Trazer itens de uma nota fiscal</div>
+    ${importActionsCard()}
+    <button class="lt-help-link" onclick="setListasTab('como')">Em dúvida? Veja o passo a passo →</button>
+  </div>`;
+  html += `<div class="section-label" style="margin:18px 0 10px">Notas escaneadas${escaneadas.length?` · ${escaneadas.length}`:""}</div>`;
+  html += escaneadas.length ? escaneadas.map(renderListCard).join("")
+    : `<div class="lt-empty">Nenhuma nota importada ainda.<br>Use os botões acima para escanear a primeira. 📷</div>`;
+  return html;
+}
+function renderComoImportarTab(){
+  return `<div class="section-label" style="margin-bottom:12px">Como importar uma nota</div>
+    <ol class="nfi-steps">
+      <li><strong>Leia o QR da nota.</strong> Na aba <em>Notas escaneadas</em>, toque em <em>Ler QR da nota</em> e aponte a câmera para o QR do cupom.</li>
+      <li><strong>Abra a nota.</strong> Toque em <em>Abrir nota fiscal</em> — abre a página da Fazenda com todos os itens.</li>
+      <li><strong>Tire um print</strong> dessa página (ou salve como PDF). <span class="lt-print-tip">No Android: segure Ligar + Volume−. No iPhone: botão lateral + Volume+.</span></li>
+      <li><strong>Volte ao app</strong>, na aba <em>Notas escaneadas</em>.</li>
+      <li><strong>Toque em <em>Importar a nota</em></strong> e envie o print/PDF. Confira os itens e pronto: vira uma <strong>lista nova, separada</strong>.</li>
+    </ol>
+    <div style="margin-top:6px">${importActionsCard()}</div>`;
+}
 function renderListasView(){
   const el = document.getElementById("listas-view-content");
   if(!el) return;
-  el.innerHTML = lists.map(l => {
-    const isActive = l.id===activeListId;
-    const isExpanded = l.id===expandedListId;
-    const safeNameAttr = l.name.replace(/"/g,'&quot;');
-    return `<div class="lc-card${isActive?" active":""}${isExpanded?" expanded":""}">
-      <div class="lc-header">
-        <input class="lc-name-input" value="${safeNameAttr}"
-          onblur="renameList('${l.id}',this.value)"
-          onkeydown="if(event.key==='Enter')this.blur()">
-        <div class="lc-expand-trigger" onclick="toggleExpandList('${l.id}')">
-          <span class="lc-count" id="lc-count-${l.id}">${(l.items||[]).length} itens</span>
-          ${isActive?'<span class="lc-badge">ativa</span>':""}
-          <span class="lc-arrow${isExpanded?" open":""}">▾</span>
-        </div>
-      </div>
-      <div class="lc-actions" onclick="event.stopPropagation()">
-        ${!isActive?`<button class="hist-add-prev-btn" onclick="useList('${l.id}')">Usar</button>`:""}
-        <button class="hist-add-prev-btn" onclick="importItemsToActive((getListById('${l.id}')||{}).items||[])">📥 Importar p/ ativa</button>
-        ${lists.length>1?`<button class="hist-act-btn" onclick="deleteList('${l.id}')" title="Excluir lista">🗑</button>`:""}
-      </div>
-      ${isExpanded?`<div class="lc-body">
-        <div class="lc-mode-pills">
-          <button class="lc-mode-pill${lcSearchMode==="catalogo"?" active":""}" onclick="setLcSearchMode('catalogo')">🔍 Buscar no catálogo</button>
-          <button class="lc-mode-pill${lcSearchMode==="lista"?" active":""}" onclick="setLcSearchMode('lista')">📝 Itens desta lista</button>
-        </div>
-        <input id="lc-search-input" class="lc-search" placeholder="${lcSearchMode==="catalogo"?"Buscar produto no catálogo...":"Buscar nos itens desta lista..."}" value="${lcSearchQuery.replace(/"/g,"&quot;")}" oninput="onLcSearchInput(this.value)">
-        <div id="lc-results"></div>
-      </div>`:""}
-    </div>`;
-  }).join("");
+  document.querySelectorAll("#view-listas .lt-tab").forEach(b => b.classList.toggle("active", b.dataset.lt===listasTab));
+  if(listasTab === "escaneadas") el.innerHTML = renderEscaneadasTab();
+  else if(listasTab === "como") el.innerHTML = renderComoImportarTab();
+  else el.innerHTML = renderCriadasTab();
   renderLcResults();
 }
 
@@ -1387,6 +1554,307 @@ function stopQrCamera(){
 function closeQrModal(){
   stopQrCamera();
   document.getElementById("qr-modal").classList.remove("open");
+}
+
+/* ── IMPORTAR ITENS DA NOTA (FOTO / PDF) ── */
+let nfiItems = [];
+let tesseractLoadPromise = null;
+let pdfjsLoadPromise = null;
+
+function loadTesseract(){
+  if(window.Tesseract) return Promise.resolve();
+  if(tesseractLoadPromise) return tesseractLoadPromise;
+  tesseractLoadPromise = new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
+    s.onload = resolve;
+    s.onerror = () => reject(new Error("Falha ao carregar o leitor de texto"));
+    document.head.appendChild(s);
+  });
+  return tesseractLoadPromise;
+}
+function loadPdfJs(){
+  if(window.pdfjsLib) return Promise.resolve();
+  if(pdfjsLoadPromise) return pdfjsLoadPromise;
+  pdfjsLoadPromise = new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js";
+    s.onload = () => {
+      try{ window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js"; }catch(e){}
+      resolve();
+    };
+    s.onerror = () => reject(new Error("Falha ao carregar o leitor de PDF"));
+    document.head.appendChild(s);
+  });
+  return pdfjsLoadPromise;
+}
+
+function nfiStep(step){
+  ["upload","processing","review"].forEach(s => {
+    const el = document.getElementById("nfi-step-"+s);
+    if(el) el.style.display = s===step ? "block" : "none";
+  });
+}
+function openNfImport(){
+  nfiItems = [];
+  nfiStep("upload");
+  document.getElementById("nfi-file-input").value = "";
+  document.getElementById("nfimport-modal").classList.add("open");
+}
+function closeNfImport(){
+  document.getElementById("nfimport-modal").classList.remove("open");
+  nfiItems = [];
+}
+function nfiProgress(pct, label){
+  const bar = document.getElementById("nfi-bar-fill");
+  const prog = document.getElementById("nfi-prog");
+  if(bar) bar.style.width = Math.max(0, Math.min(100, pct)) + "%";
+  if(prog && label!=null) prog.textContent = label;
+}
+
+async function handleNfFile(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  nfiStep("processing");
+  nfiProgress(5, "Preparando...");
+  try{
+    let text = "";
+    if(file.type === "application/pdf" || /\.pdf$/i.test(file.name)){
+      text = await readPdfText(file);
+    } else {
+      text = await readImageText(file);
+    }
+    const parsed = parseNotaText(text);
+    if(!parsed.length){
+      showToast("Não consegui identificar itens. Tente um print mais nítido, com a lista de produtos visível.");
+      nfiStep("upload");
+      return;
+    }
+    nfiItems = parsed;
+    renderNfReview();
+    nfiStep("review");
+  } catch(err){
+    showToast("Erro ao ler o arquivo. Tente novamente.");
+    nfiStep("upload");
+  }
+}
+
+async function readImageText(file){
+  nfiProgress(15, "Carregando leitor de texto...");
+  await loadTesseract();
+  nfiProgress(25, "Lendo o texto da imagem...");
+  const result = await Tesseract.recognize(file, "por", {
+    logger: m => {
+      if(m.status === "recognizing text") nfiProgress(25 + (m.progress||0)*70, "Lendo... " + Math.round((m.progress||0)*100) + "%");
+    }
+  });
+  return (result.data && result.data.text) || "";
+}
+async function readPdfText(file){
+  nfiProgress(15, "Carregando leitor de PDF...");
+  await loadPdfJs();
+  nfiProgress(25, "Abrindo o PDF...");
+  const buf = await file.arrayBuffer();
+  const pdf = await window.pdfjsLib.getDocument({data: buf}).promise;
+  let text = "";
+  for(let p=1; p<=pdf.numPages; p++){
+    const page = await pdf.getPage(p);
+    const content = await page.getTextContent();
+    text += "\n" + groupPdfLines(content.items);
+    nfiProgress(25 + (p/pdf.numPages)*45, "Lendo página " + p + " de " + pdf.numPages + "...");
+  }
+  // PDF "imagem" (escaneado): quase sem texto -> lê a 1ª página como imagem (OCR)
+  if(text.replace(/\s/g,"").length < 15){
+    nfiProgress(45, "PDF sem texto — lendo como imagem...");
+    const img = await pdfPageToBlob(pdf);
+    if(img) text = await readImageText(img);
+  }
+  return text;
+}
+function groupPdfLines(items){
+  const rows = {};
+  items.forEach(it => {
+    const y = Math.round((it.transform && it.transform[5]) || 0);
+    (rows[y] = rows[y] || []).push(it);
+  });
+  return Object.keys(rows).map(Number).sort((a,b) => b-a)
+    .map(y => rows[y].map(i => i.str).join(" ").replace(/\s+/g," ").trim())
+    .filter(Boolean).join("\n");
+}
+async function pdfPageToBlob(pdf){
+  try{
+    const page = await pdf.getPage(1);
+    const viewport = page.getViewport({scale: 2});
+    const canvas = document.createElement("canvas");
+    canvas.width = viewport.width; canvas.height = viewport.height;
+    await page.render({canvasContext: canvas.getContext("2d"), viewport}).promise;
+    return await new Promise(res => canvas.toBlob(res, "image/png"));
+  }catch(e){ return null; }
+}
+
+function nfiTitleCase(s){
+  return s.toLowerCase().replace(/\b([a-zà-ÿ])([a-zà-ÿ']*)/g, (m,a,b) => a.toUpperCase()+b).trim();
+}
+function guessCat(name){
+  const n = " " + name.toLowerCase() + " ";
+  const map = [
+    ["🥩 Carnes / Aves", ["carne","frango","file","filé","coxa","sobrecoxa","picanha","alcatra","acem","patinho","costela","linguic","linguiç","bisteca","peito de frango","moida","moída","pernil","bacon","peixe","tilap","tilá","camar","salsicha","fraldinha","maminha","cupim","asa de frango"]],
+    ["🧊 Frios / Embutidos", ["presunto","mortadela","salame","peito de peru","apresuntado","embutido","copa "]],
+    ["🧀 Queijos / Laticínios", ["queijo","mussarela","muçarela","muçar","requeij","leite","iogurte","manteiga","margarina","creme de leite","leite conden","nata "]],
+    ["🍞 Pães / Massas / Farinhas", ["pao","pão","pães","biscoito","bolacha","macarr","massa","farinha","trigo","torrada","bisnaga","croissant","lasanha","nhoque"]],
+    ["🥦 Hortifruti", ["banana","maca ","maçã","laranja","tomate","batata","cebola","alho","alface","cenoura","limao","limão","mamao","mamão","melancia","melao","melão","uva","manga","abacaxi","abacate","verdura","legume","fruta","brocolis","brócolis","abobrinha","pimentao","pimentão","couve","mandioca","beterraba","pepino","repolho","morango","goiaba","maracuja","maracujá"]],
+    ["🌾 Grãos / Cereais", ["arroz","feijao","feijão","lentilha","grao","grão","aveia","granola","cereal","milho","ervilha","quinoa","gergelim"]],
+    ["🥤 Bebidas", ["refrigerante","suco","cerveja","agua","água","refri","coca","guarana","guaraná","vinho","energetic","energétic","cha ","chá","cafe","café","achocolat","nescau","toddy","fanta","sprite","schweppes","isotonic","gatorade"]],
+    ["🧴 Molhos / Temperos", ["oleo","óleo","azeite"," sal ","açucar","açúcar","acucar","vinagre","molho","ketchup","catchup","maionese","mostarda","tempero","caldo ","extrato","oregano","orégano","pimenta","shoyu","colorau","cominho"]],
+    ["🍪 Snacks / Doces", ["chocolate","bala ","chiclete","salgadinho","batata frita","doce","bombom","pipoca","amendoim","wafer","pacoca","paçoca","gelatina","sorvete","brigadeiro","biscoito recheado","barra de cereal"]],
+    ["🧹 Limpeza / Higiene", ["sabao","sabão","detergente","amaciante","desinfet","sanitar","sanitár","cloro","papel higien","papel higiê","sabonete","shampoo","xampu","condicionador","creme dental","pasta de dente","desodor","absorvente","fralda","esponja","alcool","álcool","limpa ","lustra","multiuso","guardanapo","papel toalha","cotonete","lenco","lenço"]],
+    ["🏠 Utensílios / Casa", ["pilha","lampada","lâmpada","vela ","fosforo","fósforo","saco de lixo","papel aluminio","papel alumínio","filme pvc","copo descart","prato descart","isqueiro","palito"]]
+  ];
+  for(const pair of map){
+    for(const w of pair[1]){ if(n.indexOf(w) >= 0) return pair[0]; }
+  }
+  return CATEGORIES[0];
+}
+
+function parseNotaText(raw){
+  if(!raw) return [];
+  const moneyRe = /\d{1,3}(?:\.\d{3})*,\d{2}|\d+,\d{2}|\d+\.\d{2}/g;
+  const toNum = s => {
+    s = String(s);
+    if(s.indexOf(",") >= 0) return parseFloat(s.replace(/\./g,"").replace(",","."));
+    return parseFloat(s);
+  };
+  const markerRe = /(qtde|qtd\b|vl\.?\s*unit|vl\.?\s*total|valor\s*unit|\bun\s*:|c[oó]digo)/i;
+  const skipRe = /(cnpj|cpf|valor a pagar|valor pago|valor total|valor aprox|forma de pagamento|forma pgto|troco|tributos|trib\.?\s*aprox|total de iten|qtd\.?\s*total|quantidade total|consumidor|chave de acesso|protocolo|emiss|sefaz|nfc-?e|s[eé]rie|raz[aã]o social|inscri[cç]|endere|logradouro|bairro|munic[ií]|\bcep\b|via do consum|danfe|documento auxiliar|desconto|acr[eé]scimo)/i;
+
+  let lines = raw.split(/\r?\n/).map(l => l.replace(/\s+/g," ").trim()).filter(l => l.length);
+
+  // junta uma linha que é só nome (sem preço/marcador) com a próxima que tem preço/marcador
+  const merged = [];
+  for(let i=0; i<lines.length; i++){
+    const l = lines[i];
+    moneyRe.lastIndex = 0;
+    const hasMoney = moneyRe.test(l);
+    const hasMarker = markerRe.test(l);
+    const hasLetters = /[a-zA-ZÀ-ÿ]{3,}/.test(l);
+    if(hasLetters && !hasMoney && !skipRe.test(l) && i+1 < lines.length){
+      const nxt = lines[i+1];
+      moneyRe.lastIndex = 0;
+      if((markerRe.test(nxt) || moneyRe.test(nxt)) && !skipRe.test(nxt)){
+        merged.push((l + " " + nxt).trim());
+        i++;
+        continue;
+      }
+    }
+    merged.push(l);
+  }
+
+  const items = [];
+  for(const l of merged){
+    if(skipRe.test(l)) continue;
+    moneyRe.lastIndex = 0;
+    const monies = l.match(moneyRe);
+    const hasMarker = markerRe.test(l);
+    if(!monies && !hasMarker) continue;
+    if(!/[a-zA-ZÀ-ÿ]{2,}/.test(l)) continue;
+
+    // quantidade
+    let qty = 1;
+    const qm = l.match(/qtde?\.?\s*:?\s*(\d+(?:[.,]\d+)?)/i);
+    if(qm){ const q = Math.round(parseFloat(qm[1].replace(",","."))); if(q>=1 && q<=99) qty = q; }
+
+    // preço unitário (referência): prioriza "Vl. Unit", senão total/qtde, senão último valor da linha
+    let price = null;
+    const um = l.match(/vl\.?\s*unit\w*\.?\s*:?\s*(\d{1,3}(?:\.\d{3})*,\d{2}|\d+[.,]\d{2})/i)
+            || l.match(/valor\s*unit\w*\.?\s*:?\s*(\d{1,3}(?:\.\d{3})*,\d{2}|\d+[.,]\d{2})/i);
+    const tm = l.match(/vl\.?\s*total\.?\s*:?\s*(\d{1,3}(?:\.\d{3})*,\d{2}|\d+[.,]\d{2})/i);
+    if(um) price = toNum(um[1]);
+    else if(tm) price = toNum(tm[1]) / qty;
+    else if(monies && monies.length) price = toNum(monies[monies.length-1]) / qty;
+    if(price != null && (!isFinite(price) || price <= 0)) price = null;
+    if(price != null) price = Math.round(price*100)/100;
+
+    // nome do produto: tira códigos, marcadores e valores
+    let name = l
+      .replace(/\(?\s*c[oó]digo\s*[:\-]?\s*\d+\s*\)?/ig, " ")
+      .replace(/vl\.?\s*(unit|total)\w*\.?\s*:?\s*[\d.,]+/ig, " ")
+      .replace(/valor\s*unit\w*\.?\s*:?\s*[\d.,]+/ig, " ")
+      .replace(/qtde?\.?\s*:?\s*[\d.,]+/ig, " ")
+      .replace(/\bun\s*:\s*[a-zà-ÿ]{1,4}\b/ig, " ")
+      .replace(moneyRe, " ")
+      .replace(/\b\d{5,}\b/g, " ")
+      .replace(/\bvl\.?\b/ig, " ")
+      .replace(/[|>•*▪◦]/g, " ")
+      .replace(/[.:]+(?=\s|$)/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .replace(/^\d+\s+/, "")
+      .replace(/\s+\d+$/, "")
+      .trim();
+
+    if(name.length < 2 || !/[a-zA-ZÀ-ÿ]{2,}/.test(name)) continue;
+    name = nfiTitleCase(name);
+    items.push({ name, qty, price, cat: guessCat(name), include: true });
+  }
+
+  // junta duplicatas exatas somando a quantidade
+  const out = [];
+  items.forEach(it => {
+    const ex = out.find(o => o.name.toLowerCase() === it.name.toLowerCase());
+    if(ex){ ex.qty += it.qty; if(ex.price == null) ex.price = it.price; }
+    else out.push(it);
+  });
+  return out;
+}
+
+function renderNfReview(){
+  const nameInput = document.getElementById("nfi-list-name");
+  if(nameInput && !nameInput.value.trim()) nameInput.value = "Nota fiscal — " + fmtDateBR(new Date());
+  document.getElementById("nfi-found").textContent =
+    nfiItems.length + (nfiItems.length===1 ? " item encontrado." : " itens encontrados.") +
+    " Confira os nomes, quantidades e valores — corrija o que precisar e desmarque o que não quiser.";
+  const catOpts = (selected) => CATEGORIES.map(c => `<option value="${c}" ${c===selected?"selected":""}>${c}</option>`).join("");
+  document.getElementById("nfi-items").innerHTML = nfiItems.map((it, idx) => `
+    <div class="nfi-rowwrap${it.include?"":" off"}" id="nfi-rw-${idx}">
+      <div class="nfi-row">
+        <input type="checkbox" ${it.include?"checked":""} onchange="nfiItems[${idx}].include=this.checked;document.getElementById('nfi-rw-${idx}').classList.toggle('off',!this.checked)">
+        <input class="bs-input nfi-name" value="${(it.name||'').replace(/"/g,'&quot;')}" oninput="nfiItems[${idx}].name=this.value">
+        <input class="bs-input nfi-qty" type="number" min="1" value="${it.qty||1}" oninput="nfiItems[${idx}].qty=Math.max(1,parseInt(this.value)||1)">
+        <input class="bs-input nfi-price" type="number" min="0" step="0.01" placeholder="—" value="${it.price!=null?it.price:''}" oninput="var p=parseFloat(this.value);nfiItems[${idx}].price=isNaN(p)?null:p">
+        <button class="ml-item-rm" onclick="nfiItems.splice(${idx},1);renderNfReview()" title="Remover">×</button>
+      </div>
+      <select class="bs-input nfi-catsel" onchange="nfiItems[${idx}].cat=this.value">${catOpts(it.cat)}</select>
+    </div>`).join("");
+}
+function confirmNfImport(){
+  const toAdd = nfiItems.filter(i => i.include && (i.name||"").trim());
+  if(!toAdd.length){ showToast("Nenhum item selecionado"); return; }
+  const nameInput = document.getElementById("nfi-list-name");
+  const name = (nameInput && nameInput.value.trim()) || ("Nota fiscal — " + fmtDateBR(new Date()));
+  const id = "l" + Date.now();
+  const newList = {
+    id,
+    name,
+    source: "scan",
+    scannedAt: Date.now(),
+    items: toAdd.map(si => ({
+      id: Date.now()+Math.random(),
+      name: (si.name||"").trim(),
+      cat: si.cat || CATEGORIES[0],
+      checked: false,
+      freq: 1,
+      qty: si.qty || 1,
+      old: (si.price!=null && isFinite(si.price)) ? si.price : null,
+      cur: null
+    }))
+  };
+  lists.push(newList);
+  localStorage.setItem(LISTS_KEY, JSON.stringify(lists));
+  closeNfImport();
+  listasTab = "escaneadas";   // ao voltar pra Minhas Listas, mostra a aba das notas
+  switchList(id);             // torna a nota a lista ativa...
+  switchView("lista");        // ...e abre pra conferir os itens
+  showToast("✓ Nota importada! Criamos \"" + name + "\"");
 }
 
 /* ── SIDEBAR ── */
@@ -1852,6 +2320,46 @@ function toggleHistSession(id){
   renderHistorico();
 }
 
+/* ── EDITAR ITENS DE UMA COMPRA SALVA ── */
+function recalcHistTotal(its){
+  return (its||[]).reduce((a,i) => a + ((i.price!=null?i.price:0) * (i.qty||1)), 0);
+}
+function withHistSession(id, fn){
+  let history = JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]");
+  history = history.map(s => {
+    if(s.id !== id) return s;
+    const ns = {...s, items:(s.items||[]).map(x => ({...x}))};
+    fn(ns);
+    ns.total = recalcHistTotal(ns.items);
+    return ns;
+  });
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+}
+function toggleEditHistSession(id){
+  editingSessions[id] = !editingSessions[id];
+  if(editingSessions[id]) expandedSessions[id] = true;
+  renderHistorico();
+}
+function updateHistItem(id, idx, field, value){
+  withHistSession(id, s => {
+    if(!s.items[idx]) return;
+    if(field === "qty") s.items[idx].qty = Math.max(1, parseInt(value)||1);
+    else if(field === "price") s.items[idx].price = (value===""||value==null) ? null : (parseFloat(value)||0);
+    else s.items[idx].name = value;
+  });
+  renderHistorico();
+}
+function removeHistItem(id, idx){
+  withHistSession(id, s => { s.items.splice(idx, 1); });
+  renderHistorico();
+}
+function addHistItem(id){
+  editingSessions[id] = true;
+  expandedSessions[id] = true;
+  withHistSession(id, s => { s.items.push({name:"", qty:1, price:null}); });
+  renderHistorico();
+}
+
 function openManualList(){
   manualListItems = [];
   const today = new Date().toISOString().split("T")[0];
@@ -1939,10 +2447,7 @@ function renderHistorico(){
 
   const headerRow = `<div class="hist-header-row">
     <span style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-3)">${history.length} lista${history.length!==1?"s":""} salva${history.length!==1?"s":""}</span>
-    <div style="display:flex;gap:6px">
-      <button class="hist-add-prev-btn" onclick="openQrModal()" title="Ler QR code da nota fiscal">🧾 QR</button>
-      <button class="hist-add-prev-btn" onclick="openManualList()">+ Adicionar anterior</button>
-    </div>
+    <button class="hist-add-prev-btn" onclick="openManualList()">+ Adicionar anterior</button>
   </div>`;
 
   if(!history.length){
@@ -1963,6 +2468,7 @@ function renderHistorico(){
     const sid = session.id;
     const sname = (session.name || "Lista salva").replace(/"/g,'&quot;');
     const isOpen = !!expandedSessions[sid];
+    const editing = !!editingSessions[sid];
     html += `<div class="hist-session">
       <div class="hist-session-header" onclick="toggleHistSession('${sid}')">
         <div class="hist-session-date" onclick="event.stopPropagation()">
@@ -1974,6 +2480,7 @@ function renderHistorico(){
         </div>
         <span class="hist-session-total">${fmt(session.total||0)}</span>
         <div class="hist-session-actions" onclick="event.stopPropagation()">
+          <button class="hist-act-btn hist-edit-btn${editing?" on":""}" onclick="toggleEditHistSession('${sid}')" title="${editing?'Concluir edição':'Editar itens e valores'}">${editing?'✓':'✏️'}</button>
           <button class="hist-act-btn" onclick="importItemsToActive((JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]').find(s=>s.id==='${sid}')||{}).items||[])" title="Importar esta compra para a lista ativa">📥</button>
           <button class="hist-act-btn" onclick="deleteHistSession('${sid}')" title="Excluir">🗑</button>
         </div>
@@ -1985,14 +2492,29 @@ function renderHistorico(){
           ${session.manual?`<span style="font-size:9px;padding:2px 6px;background:var(--accent-bg);color:var(--accent);border-radius:8px;font-weight:600">inserida</span>`:""}
         </div>`;
 
-    (session.items||[]).forEach(item => {
-      const price = item.price!=null ? fmt(item.price*(item.qty||1)) : "—";
-      html += `<div class="hist-item-row">
-        <span class="hist-item-name">${item.name||"Item"}</span>
-        <span class="hist-item-qty">${(item.qty||1)>1?(item.qty||1)+"×":""}</span>
-        <span class="hist-item-price">${price}</span>
+    if(editing){
+      (session.items||[]).forEach((item, idx) => {
+        html += `<div class="hist-item-edit">
+          <input class="hist-edit-name" value="${(item.name||'').replace(/"/g,'&quot;')}" placeholder="Nome do item" onchange="updateHistItem('${sid}',${idx},'name',this.value)">
+          <input class="hist-edit-qty" type="number" min="1" value="${item.qty||1}" title="Quantidade" onchange="updateHistItem('${sid}',${idx},'qty',this.value)">
+          <input class="hist-edit-price" type="number" min="0" step="0.01" placeholder="0,00" value="${item.price!=null?item.price:''}" title="Valor de cada unidade" onchange="updateHistItem('${sid}',${idx},'price',this.value)">
+          <button class="ml-item-rm" onclick="removeHistItem('${sid}',${idx})" title="Remover item">×</button>
+        </div>`;
+      });
+      html += `<div class="hist-edit-foot">
+        <button class="hist-add-prev-btn" onclick="addHistItem('${sid}')">+ adicionar item</button>
+        <span class="hist-edit-hint">Valor = preço de cada unidade. O total se atualiza sozinho.</span>
       </div>`;
-    });
+    } else {
+      (session.items||[]).forEach(item => {
+        const price = item.price!=null ? fmt(item.price*(item.qty||1)) : "—";
+        html += `<div class="hist-item-row">
+          <span class="hist-item-name">${item.name||"Item"}</span>
+          <span class="hist-item-qty">${(item.qty||1)>1?(item.qty||1)+"×":""}</span>
+          <span class="hist-item-price">${price}</span>
+        </div>`;
+      });
+    }
     html += `</div></div>`;
   });
   html += `</div>`;
