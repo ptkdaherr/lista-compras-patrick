@@ -461,9 +461,16 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
     <div class="nav-item" onclick="toggleTheme()" style="border-top:1px solid var(--border);margin-top:8px">
       <span class="nav-icon" id="theme-icon">🌙</span><span id="theme-label">Modo escuro</span>
     </div>
+    <div class="nav-item" onclick="fazerBackup()">
+      <span class="nav-icon">💾</span><span>Fazer backup</span>
+    </div>
+    <div class="nav-item" onclick="abrirRestaurar()">
+      <span class="nav-icon">📥</span><span>Restaurar backup</span>
+    </div>
   </nav>
   <div class="sb-foot">idealizado por Patrick Daher</div>
 </div>
+<input type="file" id="backup-file-input" accept="application/json,.json" style="display:none" onchange="restaurarBackup(event)">
 
 <div id="header">
   <div class="hd-top">
@@ -1976,6 +1983,63 @@ function applyTheme(theme){
 function toggleTheme(){
   const cur = document.documentElement.getAttribute("data-theme") || "light";
   applyTheme(cur==="dark" ? "light" : "dark");
+}
+
+/* ── BACKUP / RESTAURAR (sem servidor — arquivo que o usuário guarda) ── */
+const BACKUP_KEYS = [LISTS_KEY, ACTIVE_LIST_KEY, HISTORY_KEY, CATALOG_OVERRIDES_KEY, STORAGE_KEY, "theme-pref"];
+async function fazerBackup(){
+  closeSidebar();
+  const data = {};
+  BACKUP_KEYS.forEach(k => { const v = localStorage.getItem(k); if(v != null) data[k] = v; });
+  const payload = { app:"lista-compras", version:1, exportedAt:new Date().toISOString(), data };
+  const json = JSON.stringify(payload);
+  const fname = "lista-compras-backup-" + new Date().toISOString().slice(0,10) + ".json";
+  // 1) tenta abrir a folha de compartilhar (WhatsApp/Drive/e-mail) com o arquivo
+  try{
+    const file = new File([json], fname, { type:"application/json" });
+    if(navigator.canShare && navigator.canShare({ files:[file] })){
+      await navigator.share({ files:[file], title:"Backup das minhas listas", text:"Backup das minhas listas de compras" });
+      return;
+    }
+  }catch(e){ if(e && e.name === "AbortError") return; }   // usuário cancelou o compartilhar
+  // 2) fallback: baixa o arquivo
+  try{
+    const blob = new Blob([json], { type:"application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = fname;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 3000);
+    showToast("✓ Backup salvo nos seus arquivos");
+  }catch(e){ showToast("Não consegui gerar o backup"); }
+}
+function abrirRestaurar(){
+  closeSidebar();
+  const inp = document.getElementById("backup-file-input");
+  if(inp){ inp.value = ""; inp.click(); }
+}
+async function restaurarBackup(e){
+  const file = e.target.files && e.target.files[0];
+  if(!file) return;
+  try{
+    const obj = JSON.parse(await file.text());
+    if(!obj || obj.app !== "lista-compras" || !obj.data){
+      showToast("Esse arquivo não é um backup da Lista de Compras");
+      e.target.value = ""; return;
+    }
+    let n = 0;
+    try{ n = (JSON.parse(obj.data[LISTS_KEY] || "[]") || []).length; }catch(_){}
+    if(!confirm("Restaurar este backup? Ele vai SUBSTITUIR tudo que está neste celular" + (n ? (" pelas " + n + " lista(s) do backup") : "") + ". Não dá pra desfazer.")){
+      e.target.value = ""; return;
+    }
+    BACKUP_KEYS.forEach(k => { if(typeof obj.data[k] === "string") localStorage.setItem(k, obj.data[k]); });
+    e.target.value = "";
+    showToast("✓ Backup restaurado! Atualizando...");
+    setTimeout(() => location.reload(), 900);
+  }catch(err){
+    showToast("Não consegui ler esse arquivo de backup");
+    e.target.value = "";
+  }
 }
 
 /* ── LISTA ── */
