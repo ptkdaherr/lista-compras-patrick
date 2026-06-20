@@ -503,7 +503,7 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
   <button id="filter-todas-btn" class="filter-btn active" onclick="setFilter('todas',this)">Todas</button>
   <button class="filter-btn" onclick="setFilter('pendentes',this)">Pendentes</button>
   <button class="filter-btn" onclick="setFilter('concluídos',this)">Concluídos</button>
-  <button id="reset-btn" onclick="resetAll()">↺ Resetar</button>
+  <button id="reset-btn" onclick="resetAll()">🗑 Esvaziar</button>
 </div>
 <div id="legend">
   <span>Preço riscado = referência anterior</span>
@@ -1986,19 +1986,21 @@ function setFilter(f, btn){
   render();
 }
 function resetAll(){
+  if(!items.length){ showToast("A lista já está vazia"); return; }
+  if(!confirm("Apagar todos os itens desta lista? Não tem como desfazer.")) return;
   const checked = items.filter(i => i.checked);
   if(checked.length > 0){
     const now = new Date();
     const months = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
     pushToHistory(checked, `Compra de ${months[now.getMonth()]}`, now.toISOString().split("T")[0]);
   }
-  items = items.map(i => ({...i, checked:false, qty:1}));
+  items = [];                 // esvazia a lista (apaga os itens)
   filter = "todas";
   document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
   const todasBtn = document.getElementById("filter-todas-btn");
   if(todasBtn) todasBtn.classList.add("active");
   save(); render();
-  showToast(checked.length > 0 ? "✓ Lista resetada · compra salva no histórico" : "✓ Lista resetada");
+  showToast(checked.length > 0 ? "✓ Lista esvaziada · compra salva no histórico" : "✓ Lista esvaziada");
 }
 function toggleItem(id){
   items = items.map(i => i.id===id ? {...i, checked:!i.checked} : i);
