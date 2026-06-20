@@ -271,15 +271,25 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
 .nfi-bar{height:6px;border-radius:6px;background:var(--surface);overflow:hidden;margin:14px 30px 0}
 .nfi-bar-fill{height:100%;width:0;background:var(--accent);transition:width .25s}
 .nfi-found{font-size:12px;color:var(--text-3);margin:2px 0 12px;line-height:1.45}
-.nfi-rowwrap{background:var(--surface);border-radius:10px;padding:9px 10px;margin-bottom:8px;transition:opacity .15s}
-.nfi-rowwrap.off{opacity:.42}
-.nfi-row{display:flex;align-items:center;gap:7px}
-.nfi-row input[type=checkbox]{width:18px;height:18px;flex-shrink:0;accent-color:var(--accent)}
-.nfi-name{flex:1;min-width:0}
-.nfi-qty{width:40px;text-align:center;flex-shrink:0}
-.nfi-price{width:78px;flex-shrink:0}
-.nfi-rowwrap .bs-input{padding:7px 8px;font-size:13px;background:var(--bg)}
-.nfi-catsel{margin-top:7px;font-size:12px;padding:6px 8px;appearance:auto}
+.nfi-rowwrap{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:11px 12px 12px;margin-bottom:10px;transition:opacity .15s,border-color .15s}
+.nfi-rowwrap.off{opacity:.45}
+/* linha 1: marcador + nome (linha cheia) + remover */
+.nfi-top{display:flex;align-items:center;gap:11px}
+.nfi-rowwrap .nfi-chk{width:21px;height:21px;flex:0 0 auto;accent-color:var(--accent);cursor:pointer;margin:0}
+.nfi-rowwrap .nfi-name{flex:1 1 auto;width:auto;min-width:0;font-weight:600;font-size:14px;padding:9px 11px;background:var(--bg)}
+.nfi-del{flex:0 0 auto;width:30px;height:30px;border:none;background:none;color:var(--text-3);font-size:22px;line-height:1;cursor:pointer;border-radius:9px;display:flex;align-items:center;justify-content:center;transition:.15s}
+.nfi-del:active{color:var(--red);background:var(--red-bg)}
+/* linha 2: quantidade + valor + categoria, lado a lado */
+.nfi-meta{display:flex;align-items:center;gap:8px;margin-top:10px}
+.nfi-field{display:flex;align-items:center;gap:5px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:0 6px 0 11px;flex:0 0 auto}
+.nfi-field-qty{width:68px}
+.nfi-field-price{width:100px}
+.nfi-flabel{font-size:11px;font-weight:600;color:var(--text-3);letter-spacing:.3px;flex:0 0 auto;user-select:none}
+.nfi-rowwrap .nfi-field .bs-input{flex:1 1 auto;width:auto;min-width:0;border:none;background:transparent;padding:9px 2px 9px 0;font-size:13.5px;font-weight:500;text-align:left}
+.nfi-rowwrap .nfi-catsel{flex:1 1 auto;width:auto;min-width:0;font-size:12px;padding:9px 7px;appearance:auto;background:var(--bg)}
+/* esconde as setinhas dos campos numéricos pra não brigar com o espaço */
+.nfi-qty::-webkit-outer-spin-button,.nfi-qty::-webkit-inner-spin-button,.nfi-price::-webkit-outer-spin-button,.nfi-price::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.nfi-qty,.nfi-price{-moz-appearance:textfield;appearance:textfield}
 .bs-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.5)}
 .bs-panel{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;background:var(--card);border-radius:18px 18px 0 0;padding:20px 20px 36px;box-shadow:0 -8px 40px rgba(0,0,0,.15)}
 .bs-handle{width:36px;height:4px;background:var(--border);border-radius:4px;margin:0 auto 20px}
@@ -1838,14 +1848,22 @@ function renderNfReview(){
   const catOpts = (selected) => CATEGORIES.map(c => `<option value="${c}" ${c===selected?"selected":""}>${c}</option>`).join("");
   document.getElementById("nfi-items").innerHTML = nfiItems.map((it, idx) => `
     <div class="nfi-rowwrap${it.include?"":" off"}" id="nfi-rw-${idx}">
-      <div class="nfi-row">
-        <input type="checkbox" ${it.include?"checked":""} onchange="nfiItems[${idx}].include=this.checked;document.getElementById('nfi-rw-${idx}').classList.toggle('off',!this.checked)">
-        <input class="bs-input nfi-name" value="${(it.name||'').replace(/"/g,'&quot;')}" oninput="nfiItems[${idx}].name=this.value">
-        <input class="bs-input nfi-qty" type="number" min="1" value="${it.qty||1}" oninput="nfiItems[${idx}].qty=Math.max(1,parseInt(this.value)||1)">
-        <input class="bs-input nfi-price" type="number" min="0" step="0.01" placeholder="—" value="${it.price!=null?it.price:''}" oninput="var p=parseFloat(this.value);nfiItems[${idx}].price=isNaN(p)?null:p">
-        <button class="ml-item-rm" onclick="nfiItems.splice(${idx},1);renderNfReview()" title="Remover">×</button>
+      <div class="nfi-top">
+        <input type="checkbox" class="nfi-chk" ${it.include?"checked":""} title="Incluir na lista" onchange="nfiItems[${idx}].include=this.checked;document.getElementById('nfi-rw-${idx}').classList.toggle('off',!this.checked)">
+        <input class="bs-input nfi-name" value="${(it.name||'').replace(/"/g,'&quot;')}" placeholder="Nome do item" oninput="nfiItems[${idx}].name=this.value">
+        <button class="nfi-del" onclick="nfiItems.splice(${idx},1);renderNfReview()" title="Remover">×</button>
       </div>
-      <select class="bs-input nfi-catsel" onchange="nfiItems[${idx}].cat=this.value">${catOpts(it.cat)}</select>
+      <div class="nfi-meta">
+        <label class="nfi-field nfi-field-qty">
+          <span class="nfi-flabel">Qtd</span>
+          <input class="bs-input nfi-qty" type="number" min="1" inputmode="numeric" value="${it.qty||1}" oninput="nfiItems[${idx}].qty=Math.max(1,parseInt(this.value)||1)">
+        </label>
+        <label class="nfi-field nfi-field-price">
+          <span class="nfi-flabel">R$</span>
+          <input class="bs-input nfi-price" type="number" min="0" step="0.01" inputmode="decimal" placeholder="—" value="${it.price!=null?it.price:''}" oninput="var p=parseFloat(this.value);nfiItems[${idx}].price=isNaN(p)?null:p">
+        </label>
+        <select class="bs-input nfi-catsel" title="Categoria" onchange="nfiItems[${idx}].cat=this.value">${catOpts(it.cat)}</select>
+      </div>
     </div>`).join("");
 }
 function confirmNfImport(){
