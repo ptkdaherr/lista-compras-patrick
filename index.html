@@ -635,12 +635,12 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
     <div class="bs-title">Importar itens da nota</div>
 
     <div id="nfi-step-upload">
-      <p class="nfi-intro">Tirou um print (ou salvou em PDF) da nota fiscal aberta no site do governo? Envie aqui que o app lê os itens e os valores pra você.</p>
+      <p class="nfi-intro">Envie o <strong>PDF</strong> ou um <strong>print</strong> da nota fiscal aberta no site do governo. O app lê os itens e os valores. <strong>Dica:</strong> salvar como PDF deixa os valores 100% certos; o print também funciona, é só conferir.</p>
       <ol class="nfi-steps">
         <li>Em <strong>Notas escaneadas</strong>, toque em <strong>Ler QR da nota</strong> e leia o QR do cupom.</li>
         <li>Toque em <strong>Abrir nota fiscal</strong> — abre a página do governo com a lista de produtos.</li>
-        <li>Tire um <strong>print</strong> dessa tela (ou salve a página como PDF).</li>
-        <li>Volte aqui e envie a imagem ou o PDF. Você confere tudo antes de adicionar.</li>
+        <li><strong>Salve a página como PDF</strong> (mais preciso) ou tire um <strong>print</strong>.</li>
+        <li>Volte aqui e envie o PDF ou a imagem. Você confere tudo antes de adicionar.</li>
       </ol>
       <input type="file" id="nfi-file-input" accept="image/*,application/pdf" style="display:none" onchange="handleNfFile(event)">
       <button class="btn-confirm" style="width:100%;padding:13px;border-radius:10px;font-size:14px" onclick="document.getElementById('nfi-file-input').click()">📷 Enviar print ou PDF da nota</button>
@@ -1462,9 +1462,9 @@ function renderComoImportarTab(){
     <ol class="nfi-steps">
       <li><strong>Leia o QR da nota.</strong> Na aba <em>Notas escaneadas</em>, toque em <em>Ler QR da nota</em> e aponte a câmera para o QR do cupom.</li>
       <li><strong>Abra a nota.</strong> Toque em <em>Abrir nota fiscal</em> — abre a página da Fazenda com todos os itens.</li>
-      <li><strong>Tire um print</strong> dessa página (ou salve como PDF). <span class="lt-print-tip">No Android: segure Ligar + Volume−. No iPhone: botão lateral + Volume+.</span></li>
+      <li><strong>Salve a página como PDF</strong> (no menu do navegador → Imprimir/Compartilhar → Salvar como PDF). Assim os valores saem certinhos. <span class="lt-print-tip">Se preferir, dá pra tirar um print — só confira os valores depois.</span></li>
       <li><strong>Volte ao app</strong>, na aba <em>Notas escaneadas</em>.</li>
-      <li><strong>Toque em <em>Importar a nota</em></strong> e envie o print/PDF. Confira os itens e pronto: vira uma <strong>lista nova, separada</strong>.</li>
+      <li><strong>Toque em <em>Importar a nota</em></strong> e envie o PDF ou o print. Confira os itens e pronto: vira uma <strong>lista nova, separada</strong>.</li>
     </ol>
     <div style="margin-top:6px">${importActionsCard()}</div>`;
 }
@@ -1639,13 +1639,59 @@ async function handleNfFile(e){
   }
 }
 
+// Deixa a imagem mais legível para o OCR: tons de cinza, ampliação e contraste.
+// Melhora MUITO a leitura de prints de nota (letra pequena, fundo colorido).
+function preprocessImage(file){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const ow = img.naturalWidth || img.width, oh = img.naturalHeight || img.height;
+      if(!ow || !oh){ reject(new Error("imagem inválida")); return; }
+      let scale = 1500 / ow;
+      scale = Math.max(1, Math.min(scale, 2.5));                 // só amplia, até 2,5x
+      const MAXPX = 10000000;
+      if(ow*oh*scale*scale > MAXPX) scale = Math.max(1, Math.sqrt(MAXPX/(ow*oh)));
+      const w = Math.round(ow*scale), h = Math.round(oh*scale);
+      const canvas = document.createElement("canvas");
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, w, h);
+      try{
+        const id = ctx.getImageData(0,0,w,h);
+        const d = id.data;
+        let min=255, max=0;
+        for(let i=0;i<d.length;i+=4){
+          const g = d[i]*0.299 + d[i+1]*0.587 + d[i+2]*0.114;
+          d[i]=d[i+1]=d[i+2]=g;
+          if(g<min) min=g;
+          if(g>max) max=g;
+        }
+        const range = (max-min) || 1;
+        for(let i=0;i<d.length;i+=4){
+          let v = (d[i]-min)*255/range;                          // estica o contraste
+          v = (v-128)*1.2 + 128;                                 // leve realce
+          d[i]=d[i+1]=d[i+2] = v<0?0:(v>255?255:v);
+        }
+        ctx.putImageData(id,0,0);
+      }catch(e){ /* se getImageData falhar, segue com a imagem ampliada */ }
+      resolve(canvas);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Falha ao carregar a imagem")); };
+    img.src = url;
+  });
+}
 async function readImageText(file){
-  nfiProgress(15, "Carregando leitor de texto...");
+  nfiProgress(12, "Carregando leitor de texto...");
   await loadTesseract();
-  nfiProgress(25, "Lendo o texto da imagem...");
-  const result = await Tesseract.recognize(file, "por", {
+  nfiProgress(20, "Preparando a imagem...");
+  let input = file;
+  try { input = await preprocessImage(file); } catch(e){ input = file; }
+  nfiProgress(28, "Lendo o texto da imagem...");
+  const result = await Tesseract.recognize(input, "por", {
     logger: m => {
-      if(m.status === "recognizing text") nfiProgress(25 + (m.progress||0)*70, "Lendo... " + Math.round((m.progress||0)*100) + "%");
+      if(m.status === "recognizing text") nfiProgress(28 + (m.progress||0)*67, "Lendo... " + Math.round((m.progress||0)*100) + "%");
     }
   });
   return (result.data && result.data.text) || "";
@@ -1678,7 +1724,7 @@ function groupPdfLines(items){
     (rows[y] = rows[y] || []).push(it);
   });
   return Object.keys(rows).map(Number).sort((a,b) => b-a)
-    .map(y => rows[y].map(i => i.str).join(" ").replace(/\s+/g," ").trim())
+    .map(y => rows[y].sort((a,b)=>((a.transform&&a.transform[4])||0)-((b.transform&&b.transform[4])||0)).map(i => i.str).join(" ").replace(/\s+/g," ").trim())
     .filter(Boolean).join("\n");
 }
 async function pdfPageToBlob(pdf){
@@ -1716,95 +1762,64 @@ function guessCat(name){
   return CATEGORIES[0];
 }
 
+// Lê a nota fiscal (NFC-e). Cada item: "NOME (Código: NNNN) Vl. Total" numa linha
+// e "Qtde.:Q UN:U Vl.Unit:P  TOTAL" na linha de baixo. Pega o nome (antes do "(") e
+// o ÚLTIMO número da linha de baixo (= Vl. Total, o valor real do item).
 function parseNotaText(raw){
   if(!raw) return [];
-  const moneyRe = /\d{1,3}(?:\.\d{3})*,\d{2}|\d+,\d{2}|\d+\.\d{2}/g;
-  const toNum = s => {
-    s = String(s);
-    if(s.indexOf(",") >= 0) return parseFloat(s.replace(/\./g,"").replace(",","."));
-    return parseFloat(s);
-  };
-  const markerRe = /(qtde|qtd\b|vl\.?\s*unit|vl\.?\s*total|valor\s*unit|\bun\s*:|c[oó]digo)/i;
-  const skipRe = /(cnpj|cpf|valor a pagar|valor pago|valor total|valor aprox|forma de pagamento|forma pgto|troco|tributos|trib\.?\s*aprox|total de iten|qtd\.?\s*total|quantidade total|consumidor|chave de acesso|protocolo|emiss|sefaz|nfc-?e|s[eé]rie|raz[aã]o social|inscri[cç]|endere|logradouro|bairro|munic[ií]|\bcep\b|via do consum|danfe|documento auxiliar|desconto|acr[eé]scimo)/i;
+  const moneyRe = /\d{1,3}(?:\.\d{3})*,\d{2}|\d+[.,]\d{2}/g;
+  const skipRe = /(cnpj|cpf|valor a pagar|valor pago|valor total|valor aprox|vales?\s*pago|forma de pagamento|forma pgto|cart[aã]o|d[eé]bito|cr[eé]dito|dinheiro|\bpix\b|troco|tribut|federal|total de iten|qtd\.?\s*total|quantidade total|consumidor|chave de acesso|protocolo|emiss|sefaz|nfc|s[eé]rie|raz[aã]o|inscri|endere|logradouro|bairro|munic|\bcep\b|via do|danfe|documento auxiliar|desconto|acr[eé]sc|ambiente|vers[aã]o|\bxml\b|xslt|homologa|distribuidora|presidente|consult|filtrar|n[uú]mero|data\/hora|eletr[oó]nic)/i;
 
-  let lines = raw.split(/\r?\n/).map(l => l.replace(/\s+/g," ").trim()).filter(l => l.length);
+  const lines = raw.split(/\r?\n/).map(l => l.replace(/\s+/g," ").trim()).filter(Boolean);
 
-  // junta uma linha que é só nome (sem preço/marcador) com a próxima que tem preço/marcador
-  const merged = [];
-  for(let i=0; i<lines.length; i++){
-    const l = lines[i];
-    moneyRe.lastIndex = 0;
-    const hasMoney = moneyRe.test(l);
-    const hasMarker = markerRe.test(l);
-    const hasLetters = /[a-zA-ZÀ-ÿ]{3,}/.test(l);
-    if(hasLetters && !hasMoney && !skipRe.test(l) && i+1 < lines.length){
-      const nxt = lines[i+1];
-      moneyRe.lastIndex = 0;
-      if((markerRe.test(nxt) || moneyRe.test(nxt)) && !skipRe.test(nxt)){
-        merged.push((l + " " + nxt).trim());
-        i++;
-        continue;
-      }
+  function hasMoney(l){ moneyRe.lastIndex = 0; return moneyRe.test(l); }
+  function valueFromLine(l){
+    const toks = l.match(/\d[\d.,]*/g) || [];
+    if(!toks.length) return null;
+    const t = toks[toks.length-1].replace(/[.,]+$/,"");      // último número = Vl. Total
+    if(/[.,]/.test(t)){
+      const v = t.indexOf(",")>=0 ? parseFloat(t.replace(/\./g,"").replace(",",".")) : parseFloat(t);
+      return isFinite(v) ? v : null;
     }
-    merged.push(l);
+    const d = t.replace(/\D/g,"");
+    if(d.length>=3 && d.length<=6) return parseInt(d,10)/100;   // OCR perdeu a vírgula: 269 -> 2,69
+    if(d.length>=1 && d.length<=2) return parseInt(d,10);
+    return null;
+  }
+  function extractName(l){
+    let n = l;
+    const paren = n.indexOf("(");
+    if(paren > 0) n = n.slice(0, paren);
+    else { const c = n.search(/\bc[oó]d/i); if(c>0) n = n.slice(0,c); }
+    return n
+      .replace(/v[il]\.?\s*total.*/i,"")
+      .replace(/[^0-9A-Za-zÀ-ÿ\s\/&%.+-]/g," ")
+      .replace(/\s+/g," ")
+      .replace(/^[\s.\-—|]+/,"")
+      .replace(/\s+\d{4,}\s*$/,"")
+      .trim();
   }
 
   const items = [];
-  for(const l of merged){
+  for(let i=0; i<lines.length; i++){
+    const l = lines[i];
     if(skipRe.test(l)) continue;
-    moneyRe.lastIndex = 0;
-    const monies = l.match(moneyRe);
-    const hasMarker = markerRe.test(l);
-    if(!monies && !hasMarker) continue;
-    if(!/[a-zA-ZÀ-ÿ]{2,}/.test(l)) continue;
-
-    // quantidade
-    let qty = 1;
-    const qm = l.match(/qtde?\.?\s*:?\s*(\d+(?:[.,]\d+)?)/i);
-    if(qm){ const q = Math.round(parseFloat(qm[1].replace(",","."))); if(q>=1 && q<=99) qty = q; }
-
-    // preço unitário (referência): prioriza "Vl. Unit", senão total/qtde, senão último valor da linha
+    // linha de NOME de item: tem "(" (do código) ou "Código:" com letras antes
+    let anchor = l.indexOf("(");
+    if(anchor < 1){ const m = l.match(/\bc[oó]d[a-zç]{0,4}\s*[:!]?\s*\d{2,}/i); anchor = (m && m.index>0) ? m.index : -1; }
+    if(anchor < 1 || !/[A-Za-zÀ-ÿ]{3,}/.test(l.slice(0, anchor))) continue;
+    const name = extractName(l);
+    if(name.length < 2 || !/[A-Za-zÀ-ÿ]{2,}/.test(name)) continue;
     let price = null;
-    const um = l.match(/vl\.?\s*unit\w*\.?\s*:?\s*(\d{1,3}(?:\.\d{3})*,\d{2}|\d+[.,]\d{2})/i)
-            || l.match(/valor\s*unit\w*\.?\s*:?\s*(\d{1,3}(?:\.\d{3})*,\d{2}|\d+[.,]\d{2})/i);
-    const tm = l.match(/vl\.?\s*total\.?\s*:?\s*(\d{1,3}(?:\.\d{3})*,\d{2}|\d+[.,]\d{2})/i);
-    if(um) price = toNum(um[1]);
-    else if(tm) price = toNum(tm[1]) / qty;
-    else if(monies && monies.length) price = toNum(monies[monies.length-1]) / qty;
+    if(hasMoney(l)) price = valueFromLine(l);                                          // valor na mesma linha
+    else if(i+1 < lines.length && !skipRe.test(lines[i+1]) && lines[i+1].indexOf("(")<0 && /\d/.test(lines[i+1])){
+      price = valueFromLine(lines[i+1]); i++;                                           // valor na linha de baixo
+    }
     if(price != null && (!isFinite(price) || price <= 0)) price = null;
     if(price != null) price = Math.round(price*100)/100;
-
-    // nome do produto: tira códigos, marcadores e valores
-    let name = l
-      .replace(/\(?\s*c[oó]digo\s*[:\-]?\s*\d+\s*\)?/ig, " ")
-      .replace(/vl\.?\s*(unit|total)\w*\.?\s*:?\s*[\d.,]+/ig, " ")
-      .replace(/valor\s*unit\w*\.?\s*:?\s*[\d.,]+/ig, " ")
-      .replace(/qtde?\.?\s*:?\s*[\d.,]+/ig, " ")
-      .replace(/\bun\s*:\s*[a-zà-ÿ]{1,4}\b/ig, " ")
-      .replace(moneyRe, " ")
-      .replace(/\b\d{5,}\b/g, " ")
-      .replace(/\bvl\.?\b/ig, " ")
-      .replace(/[|>•*▪◦]/g, " ")
-      .replace(/[.:]+(?=\s|$)/g, " ")
-      .replace(/\s+/g, " ")
-      .trim()
-      .replace(/^\d+\s+/, "")
-      .replace(/\s+\d+$/, "")
-      .trim();
-
-    if(name.length < 2 || !/[a-zA-ZÀ-ÿ]{2,}/.test(name)) continue;
-    name = nfiTitleCase(name);
-    items.push({ name, qty, price, cat: guessCat(name), include: true });
+    items.push({ name: nfiTitleCase(name), qty:1, price, cat: guessCat(name), include:true });
   }
-
-  // junta duplicatas exatas somando a quantidade
-  const out = [];
-  items.forEach(it => {
-    const ex = out.find(o => o.name.toLowerCase() === it.name.toLowerCase());
-    if(ex){ ex.qty += it.qty; if(ex.price == null) ex.price = it.price; }
-    else out.push(it);
-  });
-  return out;
+  return items;
 }
 
 function renderNfReview(){
