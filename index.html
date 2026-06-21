@@ -328,16 +328,18 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
 .lc-card{background:var(--card);border-radius:14px;margin-bottom:12px;border:1.5px solid var(--border);overflow:hidden;transition:border-color .15s,box-shadow .15s}
 .lc-card.active{border-color:var(--accent)}
 .lc-card.expanded{box-shadow:0 6px 24px rgba(42,31,16,.08)}
-.lc-header{display:flex;align-items:center;flex-wrap:wrap;gap:6px 8px;padding:14px 16px}
-.lc-name-input{flex:1 1 100%;min-width:0;font-size:15px;font-weight:600;color:var(--text);background:none;border:none;outline:none;font-family:inherit;border-bottom:1.5px solid transparent;padding:2px 0}
+.lc-name-input{display:block;width:100%;min-width:0;font-size:16px;font-weight:700;color:var(--text);background:none;border:none;outline:none;font-family:inherit;border-bottom:1.5px solid transparent;padding:14px 16px 8px;box-sizing:border-box}
 .lc-name-input:focus{border-bottom-color:var(--accent)}
-.lc-expand-trigger{display:flex;align-items:center;gap:8px;cursor:pointer;padding:2px 0;flex-shrink:0;margin-left:auto}
+.lc-meta{display:flex;align-items:center;justify-content:space-between;gap:8px 10px;flex-wrap:wrap;padding:0 14px 12px 16px}
+.lc-meta-info{display:flex;align-items:center;gap:8px;flex-wrap:wrap;cursor:pointer;flex:1 1 auto;min-width:0}
+.lc-meta-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .lc-count{font-size:11px;color:var(--text-3);white-space:nowrap}
+.lc-total{font-size:11px;font-family:monospace;color:var(--accent);white-space:nowrap}
 .lc-badge{font-size:9px;font-weight:700;color:var(--accent);background:var(--accent-bg);padding:3px 8px;border-radius:10px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
-.lc-arrow{color:var(--text-3);font-size:11px;transition:transform .2s;flex-shrink:0}
+.lc-arrow{color:var(--text-3);font-size:11px;transition:transform .2s;flex-shrink:0;margin-left:2px}
 .lc-arrow.open{transform:rotate(180deg)}
-.lc-actions{display:flex;gap:6px;padding:0 16px 14px;flex-wrap:wrap}
-.lc-body{border-top:1px solid var(--surface);padding:14px 16px 16px;background:var(--surface)}
+.lc-body{border-top:1px solid var(--border);padding:15px 16px 16px;background:var(--surface)}
+.lc-build-title{font-family:'DM Serif Display',serif;font-size:17px;color:var(--text);margin-bottom:12px}
 .lc-mode-pills{display:flex;gap:6px;margin-bottom:10px}
 .lc-mode-pill{flex:1;padding:9px 6px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text-2);font-size:11px;font-weight:600;cursor:pointer;text-align:center;transition:all .15s;font-family:inherit}
 .lc-mode-pill.active{background:var(--text);color:var(--bg);border-color:var(--text)}
@@ -350,6 +352,13 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
 .lc-add-btn{background:var(--accent);color:#fff;border:none;border-radius:6px;padding:6px 11px;font-size:11px;cursor:pointer;white-space:nowrap;font-family:inherit;flex-shrink:0}
 .lc-add-btn.added{background:var(--green)}
 .lc-empty-msg{text-align:center;color:var(--text-3);font-size:12px;padding:14px 0}
+.lc-browse-hint{font-size:11.5px;color:var(--text-3);margin-bottom:10px;line-height:1.5}
+.lc-browse-cat{margin-bottom:6px}
+.lc-browse-head{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px 12px;border-radius:9px;border:1px solid var(--border);background:var(--card);color:var(--text);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:border-color .15s}
+.lc-browse-head.open{border-color:var(--accent);border-radius:9px 9px 0 0}
+.lc-browse-head:active{border-color:var(--accent)}
+.lc-browse-n{font-size:10px;font-weight:600;color:var(--text-3);background:var(--bg);padding:2px 8px;border-radius:20px;white-space:nowrap}
+.lc-browse-items{border:1px solid var(--accent);border-top:none;border-radius:0 0 9px 9px;padding:8px;background:var(--card)}
 .hist-header-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 4px}
 .hist-add-prev-btn{background:var(--surface);border:1.5px solid var(--border);color:var(--text-2);border-radius:8px;padding:9px 13px;font-size:11px;font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap}
 .hist-add-prev-btn:active{border-color:var(--accent);color:var(--accent)}
@@ -1335,6 +1344,16 @@ function addCatalogMatchToList(idx){
   if(!c || !expandedListId) return;
   addItemToList(expandedListId, {name:c.name, cat:c.cat, price:c.price});
 }
+let lcBrowseOpen = {};                       // categorias abertas na navegação do catálogo
+function toggleLcBrowse(cat){
+  lcBrowseOpen[cat] = !lcBrowseOpen[cat];
+  renderLcResults();
+}
+function addCatalogIdxToList(i){
+  const c = CATALOG[i];
+  if(!c || !expandedListId) return;
+  addItemToList(expandedListId, {name:c.name, cat:c.cat, price:c.price});
+}
 function changeQtyInList(listId, itemId, delta){
   const l = getListById(listId);
   if(!l) return;
@@ -1364,11 +1383,32 @@ function renderLcResults(){
   const q = normText(lcSearchQuery.trim());
 
   if(lcSearchMode === "catalogo"){
+    const inListNames = new Set(l.items.map(i => i.name.toLowerCase()));
     if(q.length < 2){
-      el.innerHTML = `<div class="lc-empty-msg">Digite ao menos 2 letras para buscar no catálogo</div>`;
+      // Navegação por categorias: a pessoa vê as opções e monta a lista tocando em "+ Add".
+      const groups = CATEGORIES.map(cat => {
+        const its = CATALOG.map((c,gi) => ({c,gi})).filter(x => x.c.cat===cat);
+        if(!its.length) return "";
+        const open = !!lcBrowseOpen[cat];
+        const rows = open ? its.map(({c,gi}) => {
+          const already = inListNames.has(c.name.toLowerCase());
+          return `<div class="lc-result-row">
+            <span class="lc-result-name">${c.name}</span>
+            <span class="lc-result-price">~${fmt(c.price)}</span>
+            <button class="lc-add-btn${already?" added":""}" onclick="addCatalogIdxToList(${gi})">${already?"✓":"+ Add"}</button>
+          </div>`;
+        }).join("") : "";
+        return `<div class="lc-browse-cat">
+          <button class="lc-browse-head${open?" open":""}" onclick="toggleLcBrowse('${cat.replace(/'/g,"\\'")}')">
+            <span>${cat}</span>
+            <span class="lc-browse-n">${open?"▲":its.length}</span>
+          </button>
+          ${open?`<div class="lc-browse-items">${rows}</div>`:""}
+        </div>`;
+      }).join("");
+      el.innerHTML = `<div class="lc-browse-hint">Toque numa categoria pra ver os produtos e adicionar com <strong>+ Add</strong> — ou busque pelo nome no campo acima. 👇</div>${groups}`;
       return;
     }
-    const inListNames = new Set(l.items.map(i => i.name.toLowerCase()));
     const matches = CATALOG.filter(c => normText(c.name).includes(q)).slice(0,30);
     lcLastMatches = matches;
     const safeQ = q.replace(/&/g,"&amp;").replace(/</g,"&lt;");
@@ -1422,26 +1462,30 @@ function renderListCard(l){
   const actions = [];
   if(!isActive) actions.push(`<button class="hist-add-prev-btn" onclick="useList('${l.id}')">${scanned?"Abrir":"Usar"}</button>`);
   if(canDeleteList(l)) actions.push(`<button class="hist-act-btn" onclick="deleteList('${l.id}')" title="Excluir lista">🗑</button>`);
+  const count = (l.items||[]).length;
+  const total = (l.items||[]).reduce((a,i) => { const p=i.cur!=null?i.cur:(i.old!=null?i.old:0); return a + p*(i.qty||1); }, 0);
   return `<div class="lc-card${isActive?" active":""}${isExpanded?" expanded":""}">
-    <div class="lc-header">
-      <input class="lc-name-input" value="${safeNameAttr}"
-        onblur="renameList('${l.id}',this.value)"
-        onkeydown="if(event.key==='Enter')this.blur()">
-      <div class="lc-expand-trigger" onclick="toggleExpandList('${l.id}')">
-        <span class="lc-count" id="lc-count-${l.id}">${(l.items||[]).length} itens</span>
+    <input class="lc-name-input" value="${safeNameAttr}" aria-label="Nome da lista"
+      onblur="renameList('${l.id}',this.value)"
+      onkeydown="if(event.key==='Enter')this.blur()">
+    ${dateLine}
+    <div class="lc-meta">
+      <div class="lc-meta-info" onclick="toggleExpandList('${l.id}')">
+        <span class="lc-count" id="lc-count-${l.id}">${count} ${count===1?"item":"itens"}</span>
+        ${total>0?`<span class="lc-total">${fmt(total)}</span>`:""}
         ${isActive?'<span class="lc-badge">ativa</span>':""}
         ${scanned?'<span class="lc-badge lc-origin-badge">da nota</span>':""}
         <span class="lc-arrow${isExpanded?" open":""}">▾</span>
       </div>
+      <div class="lc-meta-actions" onclick="event.stopPropagation()">${actions.join("")}</div>
     </div>
-    ${dateLine}
-    <div class="lc-actions" onclick="event.stopPropagation()">${actions.join("")}</div>
     ${isExpanded?`<div class="lc-body">
+      <div class="lc-build-title">Monte sua lista 🛒</div>
       <div class="lc-mode-pills">
-        <button class="lc-mode-pill${lcSearchMode==="catalogo"?" active":""}" onclick="setLcSearchMode('catalogo')">🔍 Buscar no catálogo</button>
-        <button class="lc-mode-pill${lcSearchMode==="lista"?" active":""}" onclick="setLcSearchMode('lista')">📝 Itens desta lista</button>
+        <button class="lc-mode-pill${lcSearchMode==="catalogo"?" active":""}" onclick="setLcSearchMode('catalogo')">🔍 Catálogo de produtos</button>
+        <button class="lc-mode-pill${lcSearchMode==="lista"?" active":""}" onclick="setLcSearchMode('lista')">📝 Itens da lista${count?` (${count})`:""}</button>
       </div>
-      <input id="lc-search-input" class="lc-search" placeholder="${lcSearchMode==="catalogo"?"Buscar produto no catálogo...":"Buscar nos itens desta lista..."}" value="${lcSearchQuery.replace(/"/g,"&quot;")}" oninput="onLcSearchInput(this.value)">
+      <input id="lc-search-input" class="lc-search" placeholder="${lcSearchMode==="catalogo"?"Buscar produto pelo nome...":"Buscar nos itens desta lista..."}" value="${lcSearchQuery.replace(/"/g,"&quot;")}" oninput="onLcSearchInput(this.value)">
       <div id="lc-results"></div>
     </div>`:""}
   </div>`;
