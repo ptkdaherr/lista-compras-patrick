@@ -113,6 +113,11 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
 #legend span{font-size:10px;color:var(--text-3)}
 #legend .up{color:var(--red)}
 #legend .down{color:var(--green)}
+#view-mode-row{display:flex;align-items:center;gap:10px;padding:6px 16px 2px}
+.vm-row-label{font-size:11px;color:var(--text-3)}
+.vm-seg{display:inline-flex;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:2px}
+.vm-btn{border:none;background:transparent;color:var(--text-2);font-size:12px;font-weight:600;padding:5px 12px;border-radius:6px;cursor:pointer;font-family:inherit;transition:all .15s}
+.vm-btn.active{background:var(--accent);color:#fff}
 #list{padding:8px 16px}
 .cat-block{margin-bottom:10px}
 .cat-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--card);border-radius:10px 10px 0 0;cursor:pointer;user-select:none;border-bottom:1px solid var(--surface)}
@@ -141,12 +146,16 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
 .item-name.checked{color:var(--text-3);text-decoration:line-through}
 .item-brand{font-size:10px;color:var(--text-3);letter-spacing:.3px;margin-top:1px}
 .item-freq{font-size:9px;color:var(--accent);letter-spacing:1px;margin-left:6px}
+.disp-low-tag{color:#fff;background:var(--red);border-radius:4px;padding:1px 5px;letter-spacing:.5px}
+.disp-low-banner{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:var(--accent-bg);border:1px solid var(--accent);border-radius:10px;padding:10px 13px;margin-bottom:14px;font-size:13px;color:var(--text)}
+.disp-low-btn{border:none;background:var(--accent);color:#fff;font-size:12px;font-weight:600;padding:6px 12px;border-radius:7px;cursor:pointer;font-family:inherit;white-space:nowrap}
 .item-meta{display:flex;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap}
 .qty-wrap{display:flex;align-items:center;gap:5px}
 .qty-btn{width:22px;height:22px;border-radius:5px;border:1.5px solid var(--border);background:var(--card);color:var(--text-2);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;font-family:inherit}
 .qty-btn:active{background:var(--bg)}
 .qty-val{font-size:13px;font-weight:600;color:var(--text);min-width:18px;text-align:center}
 .qty-label{font-size:10px;color:var(--text-3)}
+.unit-sel{margin-left:4px;font-size:11px;font-weight:600;color:var(--text-2);background:var(--card);border:1.5px solid var(--border);border-radius:5px;padding:2px 3px;cursor:pointer;font-family:inherit;appearance:auto}
 .price-wrap{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
 .old-price{font-size:11px;color:var(--text-3)}
 .old-price.has-new{text-decoration:line-through}
@@ -478,6 +487,9 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
     <div class="nav-item" data-view="historico" onclick="switchView('historico')">
       <span class="nav-icon">🕐</span><span>Histórico</span>
     </div>
+    <div class="nav-item" data-view="dispensa" onclick="switchView('dispensa')">
+      <span class="nav-icon">🥫</span><span>Dispensa</span>
+    </div>
     <div class="nav-item" data-view="metricas" onclick="switchView('metricas')">
       <span class="nav-icon">📊</span><span>Métricas</span>
     </div>
@@ -539,6 +551,13 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
   <span>Preço riscado = referência anterior</span>
   <span class="up">▲ subiu</span><span class="down">▼ baixou</span>
 </div>
+<div id="view-mode-row">
+  <span class="vm-row-label">Exibir:</span>
+  <div class="vm-seg">
+    <button class="vm-btn active" id="vm-cat" onclick="setViewMode('categoria')">Por categoria</button>
+    <button class="vm-btn" id="vm-flat" onclick="setViewMode('corrido')">Corrido</button>
+  </div>
+</div>
 
 <div id="view-lista" class="view active">
   <div id="list"></div>
@@ -576,10 +595,14 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
         <label class="bs-label">Valor ref. <span style="font-size:10px;color:var(--text-3);text-transform:none;letter-spacing:0">(opcional)</span></label>
         <input id="new-price" class="bs-input" type="number" min="0" step="0.01" placeholder="0,00" onkeydown="if(event.key==='Enter')confirmAdd()">
       </div>
-      <div class="bs-field" style="flex:1">
-        <label class="bs-label">Categoria</label>
-        <select id="new-cat" class="bs-input" style="appearance:auto"></select>
+      <div class="bs-field" style="width:90px;flex:none">
+        <label class="bs-label">Unidade</label>
+        <select id="new-unit" class="bs-input" style="appearance:auto"></select>
       </div>
+    </div>
+    <div class="bs-field">
+      <label class="bs-label">Categoria</label>
+      <select id="new-cat" class="bs-input" style="appearance:auto"></select>
     </div>
     <div class="bs-btns">
       <button class="bs-btn-cancel" onclick="hideForm()">Cancelar</button>
@@ -705,6 +728,10 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;max-width:520px;margi
   <div id="historico-content"></div>
 </div>
 
+<div id="view-dispensa" class="view">
+  <div id="dispensa-content"></div>
+</div>
+
 <div id="view-metricas" class="view">
   <div id="metricas-content"></div>
 </div>
@@ -714,6 +741,10 @@ const STORAGE_KEY = "patrick-lista-v5";
 const HISTORY_KEY = "patrick-lista-hist-v1";
 const CATALOG_OVERRIDES_KEY = "patrick-catalog-overrides-v1";
 const CATEGORIES = ["🥩 Carnes / Aves","🧊 Frios / Embutidos","🧀 Queijos / Laticínios","🍞 Pães / Massas / Farinhas","🥦 Hortifruti","🌾 Grãos / Cereais","🥤 Bebidas","🧴 Molhos / Temperos","🍪 Snacks / Doces","🧹 Limpeza / Higiene","🏠 Utensílios / Casa","📦 Outros"];
+// Unidades de medida de um item. "un" = unidade (padrão). Item antigo sem unit é tratado como "un".
+const UNITS = ["un","kg","g","L","ml"];
+function itemUnit(it){ return (it && UNITS.includes(it.unit)) ? it.unit : "un"; }
+function unitOpts(selected){ const s = UNITS.includes(selected)?selected:"un"; return UNITS.map(u => `<option value="${u}" ${u===s?"selected":""}>${u}</option>`).join(""); }
 
 const DEFAULTS = [
   {id:1,name:"Carne moída 500g",cat:"🥩 Carnes / Aves",checked:false,freq:4,qty:1,old:14.00,cur:null},
@@ -2667,6 +2698,7 @@ const CATALOG = [
 
 const LISTS_KEY = "patrick-lista-lists-v1";
 const ACTIVE_LIST_KEY = "patrick-lista-active-v1";
+const DISPENSA_KEY = "patrick-lista-dispensa-v1";
 
 function loadLists(){
   let ls = JSON.parse(localStorage.getItem(LISTS_KEY) || "null");
@@ -2684,6 +2716,8 @@ localStorage.setItem(ACTIVE_LIST_KEY, activeListId);
 
 let items = (lists.find(l => l.id===activeListId).items || []).map(i => ({ qty:1, ...i }));
 let filter = "todas";
+const VIEWMODE_KEY = "patrick-lista-viewmode-v1";
+let viewMode = localStorage.getItem(VIEWMODE_KEY) === "corrido" ? "corrido" : "categoria";  // "categoria" | "corrido"
 let collapsed = {};
 let catalogCollapsed = {};
 let editingPrice = null;
@@ -2779,7 +2813,7 @@ function importItemsToActive(sourceItems){
     } else {
       const price = si.price!=null ? si.price : (si.old!=null ? si.old : null);   // tolera itens com .price (histórico) ou .old (listas)
       const cat = CATEGORIES.includes(si.cat) ? si.cat : CATEGORIES[0];           // garante categoria válida (senão o item some das telas)
-      items.push({id:Date.now()+Math.random(), name:si.name, cat, checked:false, freq:1, qty:si.qty||1, old:(price!=null && isFinite(price))?price:null, cur:null});
+      items.push({id:Date.now()+Math.random(), name:si.name, cat, unit:si.unit||"un", checked:false, freq:1, qty:si.qty||1, old:(price!=null && isFinite(price))?price:null, cur:null});
     }
   });
   save(); render();
@@ -2814,7 +2848,7 @@ function addItemToList(listId, item){
   if(idx !== -1){
     l.items[idx] = {...l.items[idx], qty:(l.items[idx].qty||1)+1};
   } else {
-    l.items.push({id:Date.now()+Math.random(), name, cat:item.cat||CATEGORIES[0], checked:false, freq:1, qty:1, old:item.price!=null?item.price:null, cur:null});
+    l.items.push({id:Date.now()+Math.random(), name, cat:item.cat||CATEGORIES[0], unit:item.unit||"un", checked:false, freq:1, qty:1, old:item.price!=null?item.price:null, cur:null});
   }
   localStorage.setItem(LISTS_KEY, JSON.stringify(lists));
   if(listId === activeListId) items = l.items.map(i => ({ qty:1, ...i }));
@@ -3169,6 +3203,7 @@ function nfiProgress(pct, label){
 async function handleNfFile(e){
   const file = e.target.files[0];
   if(!file) return;
+  nfiHideRaw();
   nfiStep("processing");
   nfiProgress(5, "Preparando...");
   try{
@@ -3180,7 +3215,10 @@ async function handleNfFile(e){
     }
     const parsed = parseNotaText(text);
     if(!parsed.length){
-      showToast("Não consegui identificar itens. Tente um print mais nítido, com a lista de produtos visível.");
+      window.__nfRaw = text;                 // DEBUG: texto cru disponível no console
+      console.log("[NF import] TEXTO LIDO:\n", text);
+      nfiShowRaw(text);                       // DEBUG: mostra o texto lido na tela
+      showToast("Li o arquivo, mas não reconheci os itens. Veja a caixa abaixo.");
       nfiStep("upload");
       return;
     }
@@ -3188,9 +3226,45 @@ async function handleNfFile(e){
     renderNfReview();
     nfiStep("review");
   } catch(err){
-    showToast("Erro ao ler o arquivo. Tente novamente.");
+    console.error("[NF import] erro real:", err);
+    nfiShowRaw("ERRO: " + (err && err.message ? err.message : String(err)));  // DEBUG
+    showToast("Erro: " + (err && err.message ? err.message : "desconhecido"));
     nfiStep("upload");
   }
+}
+
+// DEBUG temporário — remover depois que o parser estiver acertado com o PDF real da Sefaz-RJ.
+// Mostra na tela o texto que o app leu do arquivo, pra o Patrick poder printar e me mandar.
+function nfiShowRaw(text){
+  let wrap = document.getElementById("nfi-rawdbg-wrap");
+  if(!wrap){
+    wrap = document.createElement("div");
+    wrap.id = "nfi-rawdbg-wrap";
+    wrap.style.cssText = "margin-top:14px";
+    wrap.innerHTML =
+      '<div style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--text-2)">' +
+      '🔧 Texto lido do arquivo (debug) — copie e mande pro Patrick acertar a leitura:</div>' +
+      '<textarea id="nfi-rawdbg" readonly style="width:100%;height:180px;font-size:11px;' +
+      'white-space:pre;overflow:auto;border:1px solid var(--text-2);border-radius:8px;padding:8px;' +
+      'background:var(--bg);color:var(--text);font-family:monospace"></textarea>' +
+      '<button type="button" id="nfi-rawdbg-copy" style="margin-top:6px;padding:7px 12px;border-radius:8px;' +
+      'border:1px solid var(--text-2);background:var(--card);color:var(--text);font-size:12px;cursor:pointer">' +
+      '📋 Copiar texto</button>';
+    const host = document.getElementById("nfi-step-upload") || document.body;
+    host.appendChild(wrap);
+    wrap.querySelector("#nfi-rawdbg-copy").onclick = function(){
+      const ta = document.getElementById("nfi-rawdbg");
+      ta.select();
+      try{ document.execCommand("copy"); }catch(e){}
+      if(navigator.clipboard){ navigator.clipboard.writeText(ta.value).catch(()=>{}); }
+      showToast("Texto copiado!");
+    };
+  }
+  document.getElementById("nfi-rawdbg").value = text || "(vazio)";
+}
+function nfiHideRaw(){
+  const wrap = document.getElementById("nfi-rawdbg-wrap");
+  if(wrap) wrap.remove();
 }
 
 // Deixa a imagem mais legível para o OCR: tons de cinza, ampliação e contraste.
@@ -3431,7 +3505,7 @@ function parseNotaText(raw){
     }
     if(price != null && (!isFinite(price) || price <= 0)) price = null;
     if(price != null) price = Math.round(price*100)/100;
-    items.push({ name: expandNfName(name), qty:1, price, cat: guessCat(name), include:true });
+    items.push({ name: expandNfName(name), qty:1, unit:"un", price, cat: guessCat(name), include:true });
   }
   return items;
 }
@@ -3455,6 +3529,10 @@ function renderNfReview(){
           <span class="nfi-flabel">Qtd</span>
           <input class="bs-input nfi-qty" type="number" min="1" inputmode="numeric" value="${it.qty||1}" oninput="nfiItems[${idx}].qty=Math.max(1,parseInt(this.value)||1)">
         </label>
+        <label class="nfi-field nfi-field-unit">
+          <span class="nfi-flabel">Un.</span>
+          <select class="bs-input nfi-unit" onchange="nfiItems[${idx}].unit=this.value">${unitOpts(it.unit)}</select>
+        </label>
         <label class="nfi-field nfi-field-price">
           <span class="nfi-flabel">R$</span>
           <input class="bs-input nfi-price" type="number" min="0" step="0.01" inputmode="decimal" placeholder="—" value="${it.price!=null?it.price:''}" oninput="var p=parseFloat(this.value);nfiItems[${idx}].price=isNaN(p)?null:p">
@@ -3462,6 +3540,25 @@ function renderNfReview(){
         <select class="bs-input nfi-catsel" title="Categoria" onchange="nfiItems[${idx}].cat=this.value">${catOpts(it.cat)}</select>
       </div>
     </div>`).join("");
+}
+// "Assinatura" de uma nota = nomes dos itens normalizados e ordenados. Serve pra
+// detectar quando a MESMA nota está sendo importada de novo (mesmo que o nome difira).
+function notaSignature(its){
+  return (its||[]).map(i => dispKey(i.name)).filter(Boolean).sort();
+}
+// Procura no histórico uma nota já importada muito parecida (≥80% dos itens iguais).
+function findDuplicateNota(histItems){
+  const sig = new Set(notaSignature(histItems));
+  if(sig.size < 2) return null;
+  const history = JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]");
+  for(const s of history){
+    if(!s.scanned) continue;
+    const oset = new Set(notaSignature(s.items));
+    if(!oset.size) continue;
+    let common = 0; sig.forEach(n => { if(oset.has(n)) common++; });
+    if(common / Math.max(sig.size, oset.size) >= 0.8) return s;
+  }
+  return null;
 }
 function confirmNfImport(){
   const toAdd = nfiItems.filter(i => i.include && (i.name||"").trim());
@@ -3474,14 +3571,18 @@ function confirmNfImport(){
     name: (si.name||"").trim(),
     cat: si.cat || "📦 Outros",
     qty: si.qty || 1,
+    unit: si.unit || "un",
     old: (si.price!=null && isFinite(si.price)) ? si.price : null,
     cur: null
   }));
+  const dup = findDuplicateNota(histItems);          // bloqueia importar a mesma nota 2x
+  if(dup && !confirm('Essa nota parece já ter sido importada antes ("' + dup.name + '").\n\nImportar mesmo assim?')) return;
   const today = new Date().toISOString().split("T")[0];
   pushToHistory(histItems, name, today, { scanned: true });
   closeNfImport();
-  switchView("historico");
   showToast("✓ Nota salva nas Listas Salvas!");
+  offerDispensa(histItems);              // nota = compra feita; oferece guardar na dispensa
+  switchView("historico");
 }
 
 /* ── SIDEBAR ── */
@@ -3500,10 +3601,10 @@ function switchView(view){
   document.querySelectorAll(".nav-item").forEach(el => el.classList.remove("active"));
   document.getElementById("view-"+view).classList.add("active");
   document.querySelector(`.nav-item[data-view="${view}"]`).classList.add("active");
-  const titles = {lista:"Lista de Compras",listas:"Minhas Listas",catalogo:"Catálogo",historico:"Histórico",metricas:"Métricas"};
+  const titles = {lista:"Lista de Compras",listas:"Minhas Listas",catalogo:"Catálogo",historico:"Histórico",dispensa:"Dispensa",metricas:"Métricas"};
   document.getElementById("page-title").textContent = titles[view];
   const isLista = view === "lista";
-  ["header-lista-extras","filters","legend"].forEach(id => {
+  ["header-lista-extras","filters","legend","view-mode-row"].forEach(id => {
     document.getElementById(id).style.display = isLista ? "" : "none";
   });
   document.getElementById("save-btn").style.display = isLista && items.length > 0 ? "block" : "none";
@@ -3514,6 +3615,7 @@ function switchView(view){
   if(view === "metricas") renderMetricas();
   if(view === "catalogo") renderCatalogo();
   if(view === "historico") renderHistorico();
+  if(view === "dispensa") renderDispensa();
   if(view === "listas") renderListasView();
   if(view === "lista") render();
 }
@@ -3542,9 +3644,11 @@ function closeSaveModal(){
 function confirmSaveList(){
   const name = document.getElementById("bs-name").value.trim() || "Lista sem nome";
   const date = document.getElementById("bs-date").value || new Date().toISOString().split("T")[0];
+  const bought = items.filter(i => i.checked);
   pushToHistory(items.slice(), name, date);
   closeSaveModal();
   showToast("✓ Lista salva no histórico");
+  offerDispensa(bought);                 // popup: guardar comprados na dispensa
   switchView("historico");
 }
 
@@ -3557,7 +3661,8 @@ function buildShareText(){
     if(!catItems.length) return;
     lines.push(cat);
     catItems.forEach(i => {
-      const qty = i.qty>1 ? ` (${i.qty}x)` : "";
+      const u = itemUnit(i);
+      const qty = (i.qty>1 || u!=="un") ? ` (${i.qty} ${u})` : "";
       lines.push(`${i.checked?"✅":"⬜"} ${i.name}${qty}`);
     });
     lines.push("");
@@ -3591,7 +3696,7 @@ function toggleTheme(){
 }
 
 /* ── BACKUP / RESTAURAR (sem servidor — arquivo que o usuário guarda) ── */
-const BACKUP_KEYS = [LISTS_KEY, ACTIVE_LIST_KEY, HISTORY_KEY, CATALOG_OVERRIDES_KEY, STORAGE_KEY, "theme-pref"];
+const BACKUP_KEYS = [LISTS_KEY, ACTIVE_LIST_KEY, HISTORY_KEY, CATALOG_OVERRIDES_KEY, DISPENSA_KEY, STORAGE_KEY, "theme-pref"];
 async function fazerBackup(){
   closeSidebar();
   const data = {};
@@ -3654,6 +3759,13 @@ function setFilter(f, btn){
   btn.classList.add("active");
   render();
 }
+function setViewMode(m){
+  viewMode = m==="corrido" ? "corrido" : "categoria";
+  localStorage.setItem(VIEWMODE_KEY, viewMode);
+  document.getElementById("vm-cat").classList.toggle("active", viewMode==="categoria");
+  document.getElementById("vm-flat").classList.toggle("active", viewMode==="corrido");
+  render();
+}
 function resetAll(){
   if(!items.length){ showToast("A lista já está vazia"); return; }
   if(!confirm("Apagar todos os itens desta lista? Não tem como desfazer.")) return;
@@ -3670,6 +3782,7 @@ function resetAll(){
   if(todasBtn) todasBtn.classList.add("active");
   save(); render();
   showToast(checked.length > 0 ? "✓ Lista esvaziada · compra salva no histórico" : "✓ Lista esvaziada");
+  offerDispensa(checked);     // popup: guardar comprados na dispensa
 }
 function toggleItem(id){
   items = items.map(i => i.id===id ? {...i, checked:!i.checked} : i);
@@ -3677,6 +3790,11 @@ function toggleItem(id){
 }
 function changeQty(id, delta){
   items = items.map(i => i.id!==id ? i : {...i, qty:Math.max(1,(i.qty||1)+delta)});
+  save(); render();
+}
+function setUnit(id, val){
+  const u = UNITS.includes(val) ? val : "un";
+  items = items.map(i => i.id===id ? {...i, unit:u} : i);
   save(); render();
 }
 function removeItem(id){
@@ -3725,8 +3843,9 @@ function confirmAdd(){
   const priceRaw = document.getElementById("new-price").value.replace(",",".");
   const price = parseFloat(priceRaw);
   const cat = document.getElementById("new-cat").value;
+  const unit = document.getElementById("new-unit").value;
   if(!name) return;
-  items.push({id:Date.now(), name, brand:brand||null, cat, checked:false, freq:1, qty:1,
+  items.push({id:Date.now(), name, brand:brand||null, cat, unit, checked:false, freq:1, qty:1,
     old: (!isNaN(price) && price > 0) ? price : null, cur:null});
   save(); hideForm(); render();
   showToast("✓ Item adicionado");
@@ -3742,6 +3861,54 @@ function toggleCatAll(cat){
   save(); render();
 }
 
+// Monta o HTML de uma linha de item da lista. Usado tanto no modo "por categoria"
+// quanto no modo "corrido" (lista contínua) — por isso fica fora do render().
+function itemRowHtml(item){
+  const isEditing = editingPrice===item.id;
+  const isEditingNameItem = editingName===item.id;
+  const isEditingOldItem = editingOld===item.id;
+  const qty = item.qty||1;
+  const diff = item.cur!=null && item.old!=null ? item.cur-item.old : null;
+  const pctDiff = diff!=null && item.old>0 ? Math.round((diff/item.old)*100) : null;
+  const up = diff!=null && diff>0;
+  const down = diff!=null && diff<0;
+  const priceUnit = item.cur!=null ? item.cur : item.old;
+  const subtotal = priceUnit!=null && qty>1 ? priceUnit*qty : null;
+  const safeNameAttr = item.name.replace(/"/g,'&quot;');
+  return `<div class="item-row${item.checked?" checked":""}">
+    <div class="checkbox${item.checked?" checked":""}" onclick="toggleItem(${item.id})"></div>
+    <div class="item-info">
+      <div class="name-row">
+        ${isEditingNameItem
+          ? `<input class="name-edit-input" id="ni_${item.id}" value="${safeNameAttr}" onkeydown="if(event.key==='Enter'){setName(${item.id},this.value);}if(event.key==='Escape')cancelEditName();"><button class="price-confirm" style="margin-left:4px" onclick="setName(${item.id},document.getElementById('ni_${item.id}').value)">✓</button><button class="price-cancel" onclick="cancelEditName()">✕</button>`
+          : `<span class="item-name${item.checked?" checked":""}">${item.name}</span>${item.freq>=3&&!item.checked?'<span class="item-freq">FREQ</span>':''}${!item.checked?`<button class="edit-name-btn" onclick="event.stopPropagation();startEditName(${item.id})">✎</button>`:''}`}
+      </div>
+      ${item.brand?`<div class="item-brand">${item.brand}</div>`:""}
+      <div class="item-meta">
+        <div class="qty-wrap">
+          <span class="qty-label">Qtd</span>
+          <button class="qty-btn" onclick="changeQty(${item.id},-1)">−</button>
+          <span class="qty-val">${qty}</span>
+          <button class="qty-btn" onclick="changeQty(${item.id},1)">+</button>
+          <select class="unit-sel" title="Unidade" onclick="event.stopPropagation()" onchange="setUnit(${item.id},this.value)">${unitOpts(itemUnit(item))}</select>
+        </div>
+        <div class="price-wrap">
+          ${isEditingOldItem
+            ? `<div class="price-input-wrap"><input class="price-input" id="oi_${item.id}" placeholder="ref 0,00" onkeydown="if(event.key==='Enter')setOldPrice(${item.id},this.value);if(event.key==='Escape')cancelEditOld()"><button class="price-confirm" onclick="setOldPrice(${item.id},document.getElementById('oi_${item.id}').value)">✓</button><button class="price-cancel" onclick="cancelEditOld()">✕</button></div>`
+            : item.old!=null
+              ? `<button class="old-price-btn${item.cur!=null?" has-new":""}" onclick="startEditOld(${item.id})">${fmt(item.old)}</button>`
+              : ""}
+          ${item.cur!=null?`<span class="new-price ${up?"up":down?"down":"same"}">${fmt(item.cur)}${pctDiff!=null&&pctDiff!==0?`<span class="price-diff">${up?"▲":"▼"}${Math.abs(pctDiff)}%</span>`:""}</span>`:""}
+          ${isEditing
+            ?`<div class="price-input-wrap"><input class="price-input" id="pi_${item.id}" placeholder="0,00" onkeydown="if(event.key==='Enter')setPrice(${item.id},this.value);if(event.key==='Escape')cancelEdit()"><button class="price-confirm" onclick="setPrice(${item.id},document.getElementById('pi_${item.id}').value)">✓</button><button class="price-cancel" onclick="cancelEdit()">✕</button></div>`
+            :`<button class="price-btn" onclick="startEdit(${item.id})">${item.cur!=null?"editar":"+ preço"}</button>`}
+        </div>
+      </div>
+      ${subtotal!=null?`<div class="item-subtotal">${qty} ${itemUnit(item)} × ${fmt(priceUnit)} = <strong>${fmt(subtotal)}</strong></div>`:""}
+    </div>
+    <button class="remove-btn" onclick="removeItem(${item.id})">×</button>
+  </div>`;
+}
 function render(){
   updateListSwitcherLabel();
   const search = document.getElementById("search").value.toLowerCase();
@@ -3788,94 +3955,56 @@ function render(){
     document.getElementById("sum-total").textContent = fmt(totalVal);
   } else { sb.style.display = "none"; }
 
+  const matchesFilter = i => {
+    const mf = filter==="todas" ? true : filter==="pendentes" ? !i.checked : i.checked;
+    return mf && i.name.toLowerCase().includes(search);
+  };
+
   let html = "";
-  CATEGORIES.forEach(cat => {
-    const catItems = items.filter(i => {
-      const mf = filter==="todas" ? true : filter==="pendentes" ? !i.checked : i.checked;
-      return i.cat===cat && mf && i.name.toLowerCase().includes(search);
-    });
-    if(!catItems.length) return;
-    const isCol = !!collapsed[cat];
-    const doneC = catItems.filter(i => i.checked).length;
-    const allDone = doneC===catItems.length;
-    const emoji = cat.split(" ")[0];
-    const catName = cat.split(" ").slice(1).join(" ");
-    const catTotal = catItems.filter(i => i.checked).reduce((a,i) => {
-      const p = i.cur!=null ? i.cur : (i.old!=null ? i.old : 0);
-      return a + p*(i.qty||1);
-    }, 0);
-    const withBoth = catItems.filter(i => i.old!=null && i.cur!=null);
-    let catPctBadge = "";
-    if(withBoth.length > 0){
-      const sumOld = withBoth.reduce((a,i) => a+i.old*(i.qty||1), 0);
-      const sumCur = withBoth.reduce((a,i) => a+i.cur*(i.qty||1), 0);
-      const savings = sumOld - sumCur;
-      const pct = Math.round(Math.abs(savings/sumOld)*100);
-      if(pct > 0) catPctBadge = `<span class="cat-pct ${savings>0?'pos':'neg'}">${savings>0?'−':'+'}${pct}%</span>`;
-    }
+  if(viewMode === "corrido"){
+    // Modo corrido: uma lista contínua, sem separar por categoria.
+    const flat = items.filter(matchesFilter);
+    html = flat.length
+      ? `<div class="cat-items">${flat.map(itemRowHtml).join("")}</div>`
+      : `<div class="empty-state" style="padding:40px 20px"><div class="empty-sub">Nenhum item para mostrar aqui.</div></div>`;
+  } else {
+    CATEGORIES.forEach(cat => {
+      const catItems = items.filter(i => i.cat===cat && matchesFilter(i));
+      if(!catItems.length) return;
+      const isCol = !!collapsed[cat];
+      const doneC = catItems.filter(i => i.checked).length;
+      const allDone = doneC===catItems.length;
+      const emoji = cat.split(" ")[0];
+      const catName = cat.split(" ").slice(1).join(" ");
+      const catTotal = catItems.filter(i => i.checked).reduce((a,i) => {
+        const p = i.cur!=null ? i.cur : (i.old!=null ? i.old : 0);
+        return a + p*(i.qty||1);
+      }, 0);
+      const withBoth = catItems.filter(i => i.old!=null && i.cur!=null);
+      let catPctBadge = "";
+      if(withBoth.length > 0){
+        const sumOld = withBoth.reduce((a,i) => a+i.old*(i.qty||1), 0);
+        const sumCur = withBoth.reduce((a,i) => a+i.cur*(i.qty||1), 0);
+        const savings = sumOld - sumCur;
+        const pct = Math.round(Math.abs(savings/sumOld)*100);
+        if(pct > 0) catPctBadge = `<span class="cat-pct ${savings>0?'pos':'neg'}">${savings>0?'−':'+'}${pct}%</span>`;
+      }
 
-    html += `<div class="cat-block"><div class="cat-header${isCol?" collapsed":""}" onclick="toggleCat('${cat.replace(/'/g,"\\'")}')">
-      <div class="cat-header-left">
-        <span class="cat-emoji">${emoji}</span>
-        <span class="cat-name">${catName}</span>
-        <span class="cat-count${allDone?" done":""}">${doneC}/${catItems.length}</span>
-        ${catTotal>0?`<span style="font-size:10px;color:var(--accent);font-family:monospace">${fmt(catTotal)}</span>`:""}
-        ${catPctBadge}
-      </div>
-      <div class="cat-header-right">
-        <button class="cat-checkall${allDone?" done":""}" onclick="event.stopPropagation();toggleCatAll('${cat.replace(/'/g,"\\'")}')" title="${allDone?'Desmarcar todos desta seção':'Marcar todos desta seção'}">${allDone?"✓ todos":"marcar todos"}</button>
-        <span class="cat-arrow${isCol?" collapsed":""}">▼</span>
-      </div>
-    </div><div class="cat-items${isCol?" hidden":""}">`;
-
-    catItems.forEach(item => {
-      const isEditing = editingPrice===item.id;
-      const isEditingNameItem = editingName===item.id;
-      const isEditingOldItem = editingOld===item.id;
-      const qty = item.qty||1;
-      const diff = item.cur!=null && item.old!=null ? item.cur-item.old : null;
-      const pctDiff = diff!=null && item.old>0 ? Math.round((diff/item.old)*100) : null;
-      const up = diff!=null && diff>0;
-      const down = diff!=null && diff<0;
-      const priceUnit = item.cur!=null ? item.cur : item.old;
-      const subtotal = priceUnit!=null && qty>1 ? priceUnit*qty : null;
-      const safeNameAttr = item.name.replace(/"/g,'&quot;');
-
-      html += `<div class="item-row${item.checked?" checked":""}">
-        <div class="checkbox${item.checked?" checked":""}" onclick="toggleItem(${item.id})"></div>
-        <div class="item-info">
-          <div class="name-row">
-            ${isEditingNameItem
-              ? `<input class="name-edit-input" id="ni_${item.id}" value="${safeNameAttr}" onkeydown="if(event.key==='Enter'){setName(${item.id},this.value);}if(event.key==='Escape')cancelEditName();"><button class="price-confirm" style="margin-left:4px" onclick="setName(${item.id},document.getElementById('ni_${item.id}').value)">✓</button><button class="price-cancel" onclick="cancelEditName()">✕</button>`
-              : `<span class="item-name${item.checked?" checked":""}">${item.name}</span>${item.freq>=3&&!item.checked?'<span class="item-freq">FREQ</span>':''}${!item.checked?`<button class="edit-name-btn" onclick="event.stopPropagation();startEditName(${item.id})">✎</button>`:''}`}
-          </div>
-          ${item.brand?`<div class="item-brand">${item.brand}</div>`:""}
-          <div class="item-meta">
-            <div class="qty-wrap">
-              <span class="qty-label">Qtd</span>
-              <button class="qty-btn" onclick="changeQty(${item.id},-1)">−</button>
-              <span class="qty-val">${qty}</span>
-              <button class="qty-btn" onclick="changeQty(${item.id},1)">+</button>
-            </div>
-            <div class="price-wrap">
-              ${isEditingOldItem
-                ? `<div class="price-input-wrap"><input class="price-input" id="oi_${item.id}" placeholder="ref 0,00" onkeydown="if(event.key==='Enter')setOldPrice(${item.id},this.value);if(event.key==='Escape')cancelEditOld()"><button class="price-confirm" onclick="setOldPrice(${item.id},document.getElementById('oi_${item.id}').value)">✓</button><button class="price-cancel" onclick="cancelEditOld()">✕</button></div>`
-                : item.old!=null
-                  ? `<button class="old-price-btn${item.cur!=null?" has-new":""}" onclick="startEditOld(${item.id})">${fmt(item.old)}</button>`
-                  : ""}
-              ${item.cur!=null?`<span class="new-price ${up?"up":down?"down":"same"}">${fmt(item.cur)}${pctDiff!=null&&pctDiff!==0?`<span class="price-diff">${up?"▲":"▼"}${Math.abs(pctDiff)}%</span>`:""}</span>`:""}
-              ${isEditing
-                ?`<div class="price-input-wrap"><input class="price-input" id="pi_${item.id}" placeholder="0,00" onkeydown="if(event.key==='Enter')setPrice(${item.id},this.value);if(event.key==='Escape')cancelEdit()"><button class="price-confirm" onclick="setPrice(${item.id},document.getElementById('pi_${item.id}').value)">✓</button><button class="price-cancel" onclick="cancelEdit()">✕</button></div>`
-                :`<button class="price-btn" onclick="startEdit(${item.id})">${item.cur!=null?"editar":"+ preço"}</button>`}
-            </div>
-          </div>
-          ${subtotal!=null?`<div class="item-subtotal">${qty}× ${fmt(priceUnit)} = <strong>${fmt(subtotal)}</strong></div>`:""}
+      html += `<div class="cat-block"><div class="cat-header${isCol?" collapsed":""}" onclick="toggleCat('${cat.replace(/'/g,"\\'")}')">
+        <div class="cat-header-left">
+          <span class="cat-emoji">${emoji}</span>
+          <span class="cat-name">${catName}</span>
+          <span class="cat-count${allDone?" done":""}">${doneC}/${catItems.length}</span>
+          ${catTotal>0?`<span style="font-size:10px;color:var(--accent);font-family:monospace">${fmt(catTotal)}</span>`:""}
+          ${catPctBadge}
         </div>
-        <button class="remove-btn" onclick="removeItem(${item.id})">×</button>
-      </div>`;
+        <div class="cat-header-right">
+          <button class="cat-checkall${allDone?" done":""}" onclick="event.stopPropagation();toggleCatAll('${cat.replace(/'/g,"\\'")}')" title="${allDone?'Desmarcar todos desta seção':'Marcar todos desta seção'}">${allDone?"✓ todos":"marcar todos"}</button>
+          <span class="cat-arrow${isCol?" collapsed":""}">▼</span>
+        </div>
+      </div><div class="cat-items${isCol?" hidden":""}">${catItems.map(itemRowHtml).join("")}</div></div>`;
     });
-    html += `</div></div>`;
-  });
+  }
 
   document.getElementById("list").innerHTML = html;
   if(editingPrice){
@@ -3927,7 +4056,7 @@ function addFromCatalog(catalogId){
     save();
     showToast("✗ Removido da lista");
   } else {
-    items.push({id:Date.now(), name:ci.name, cat:ci.cat, checked:false, freq:1, qty:1, old:ci.price, cur:null});
+    items.push({id:Date.now(), name:ci.name, cat:ci.cat, unit:"un", checked:false, freq:1, qty:1, old:ci.price, cur:null});
     save();
     showToast("✓ Adicionado à lista");
   }
@@ -3991,7 +4120,7 @@ function pushToHistory(sourceItems, name, date, extra){
     name: name || "Lista sem nome",
     date: date || new Date().toISOString().split("T")[0],
     savedAt: new Date().toISOString(),
-    items: sourceItems.map(i => ({name:i.name, qty:i.qty||1, price:i.cur!=null?i.cur:i.old, cat:i.cat})),
+    items: sourceItems.map(i => ({name:i.name, qty:i.qty||1, unit:i.unit||"un", price:i.cur!=null?i.cur:i.old, cat:i.cat})),
     total,
     ...(extra||{})
   });
@@ -4453,6 +4582,130 @@ function renderMetricas(){
   </div>`;
 }
 
+/* ── DISPENSA (estoque de casa) ── */
+const DISPENSA_LOW = 1;                                  // qty <= isto = item "acabando"
+function loadDispensa(){ try{ return JSON.parse(localStorage.getItem(DISPENSA_KEY)||"[]") || []; }catch(e){ return []; } }
+function saveDispensa(arr){ localStorage.setItem(DISPENSA_KEY, JSON.stringify(arr)); }
+function dispKey(name){ return normText(String(name||"").trim()); }
+// Adiciona um item à dispensa — ou SOMA a quantidade se já existir (casa pelo nome).
+function addToDispensa(item){
+  if(!item || !String(item.name||"").trim()) return;
+  const d = loadDispensa();
+  const k = dispKey(item.name);
+  const ex = d.find(x => dispKey(x.name)===k);
+  const addQty = Math.max(1, parseInt(item.qty)||1);
+  if(ex){
+    ex.qty = (ex.qty||0) + addQty;
+    if(item.unit && UNITS.includes(item.unit)) ex.unit = item.unit;
+  } else {
+    d.push({id:"d"+Date.now()+Math.random().toString(36).slice(2), name:String(item.name).trim(),
+      cat:CATEGORIES.includes(item.cat)?item.cat:"📦 Outros", qty:addQty, unit:itemUnit(item)});
+  }
+  saveDispensa(d);
+}
+// Popup ao finalizar uma compra: oferece guardar os itens comprados na dispensa.
+function offerDispensa(boughtItems){
+  const arr = (boughtItems||[]).filter(i => String(i.name||"").trim());
+  if(!arr.length) return;
+  const n = arr.length;
+  if(confirm("Deseja adicionar à dispensa?\n\n" + n + (n===1?" item comprado vai":" itens comprados vão") + " pro seu estoque de casa (soma a quantidade se já tiver).")){
+    arr.forEach(addToDispensa);
+    showToast("✓ " + n + (n===1?" item guardado":" itens guardados") + " na dispensa");
+  }
+}
+function changeDispensaQty(id, delta){
+  let d = loadDispensa();
+  const it = d.find(x => x.id===id);
+  if(!it) return;
+  it.qty = (it.qty||0) + delta;
+  if(it.qty <= 0) d = d.filter(x => x.id!==id);     // chegou a zero: saiu da dispensa
+  saveDispensa(d);
+  renderDispensa();
+}
+function setDispensaUnit(id, val){
+  const d = loadDispensa();
+  const it = d.find(x => x.id===id);
+  if(it){ it.unit = UNITS.includes(val)?val:"un"; saveDispensa(d); }
+}
+function removeDispensaItem(id){
+  saveDispensa(loadDispensa().filter(x => x.id!==id));
+  renderDispensa();
+}
+// Repõe um item da dispensa na lista de compras ativa.
+function dispensaToList(id){
+  const it = loadDispensa().find(x => x.id===id);
+  if(it) importItemsToActive([{name:it.name, qty:1, unit:it.unit, cat:it.cat}]);
+}
+function addLowToList(){
+  const low = loadDispensa().filter(x => (x.qty||0) <= DISPENSA_LOW);
+  if(!low.length){ showToast("Nada acabando na dispensa"); return; }
+  importItemsToActive(low.map(x => ({name:x.name, qty:1, unit:x.unit, cat:x.cat})));
+}
+function addDispensaManual(){
+  const inp = document.getElementById("disp-add-input");
+  const name = inp ? inp.value.trim() : "";
+  if(!name){ showToast("Digite o nome do item"); return; }
+  addToDispensa({name, qty:1, unit:"un", cat:guessCat(name)});
+  if(inp) inp.value = "";
+  renderDispensa();
+  setTimeout(() => { const i = document.getElementById("disp-add-input"); if(i) i.focus(); }, 30);
+}
+function renderDispensa(){
+  const el = document.getElementById("dispensa-content");
+  if(!el) return;
+  const d = loadDispensa();
+  const low = d.filter(x => (x.qty||0) <= DISPENSA_LOW);
+  let html = `<div style="padding:14px 16px 24px">`;
+  html += `<div class="bs-field" style="margin-bottom:12px">
+    <label class="bs-label">Adicionar item à dispensa</label>
+    <div style="display:flex;gap:8px">
+      <input id="disp-add-input" class="bs-input" style="margin-bottom:0" placeholder="Ex: Arroz, Sabão..." onkeydown="if(event.key==='Enter')addDispensaManual()">
+      <button class="btn-confirm" style="white-space:nowrap;padding:0 16px;border-radius:8px" onclick="addDispensaManual()">+ Add</button>
+    </div>
+  </div>`;
+  if(!d.length){
+    html += `<div class="empty-state"><div class="empty-icon">🥫</div>
+      <div class="empty-title">Sua dispensa está vazia</div>
+      <div class="empty-sub">Quando você marca itens como comprados, o app pergunta se quer guardá-los aqui. Dá pra adicionar manualmente acima também.</div></div></div>`;
+    el.innerHTML = html; return;
+  }
+  if(low.length){
+    html += `<div class="disp-low-banner"><span>⚠️ ${low.length} ${low.length===1?"item está acabando":"itens estão acabando"}</span>
+      <button class="disp-low-btn" onclick="addLowToList()">Repor na lista</button></div>`;
+  }
+  CATEGORIES.forEach(cat => {
+    const its = d.filter(x => (CATEGORIES.includes(x.cat)?x.cat:"📦 Outros")===cat);
+    if(!its.length) return;
+    const emoji = cat.split(" ")[0];
+    const catName = cat.split(" ").slice(1).join(" ");
+    html += `<div class="cat-block"><div class="cat-header" style="cursor:default"><div class="cat-header-left">
+      <span class="cat-emoji">${emoji}</span><span class="cat-name">${catName}</span>
+      <span class="cat-count">${its.length}</span></div></div><div class="cat-items">`;
+    its.forEach(it => {
+      const lowItem = (it.qty||0) <= DISPENSA_LOW;
+      html += `<div class="item-row">
+        <div class="item-info">
+          <div class="name-row"><span class="item-name">${it.name}</span>${lowItem?'<span class="item-freq disp-low-tag">ACABANDO</span>':''}</div>
+          <div class="item-meta">
+            <div class="qty-wrap">
+              <span class="qty-label">Tenho</span>
+              <button class="qty-btn" onclick="changeDispensaQty('${it.id}',-1)">−</button>
+              <span class="qty-val">${it.qty||0}</span>
+              <button class="qty-btn" onclick="changeDispensaQty('${it.id}',1)">+</button>
+              <select class="unit-sel" onchange="setDispensaUnit('${it.id}',this.value)">${unitOpts(itemUnit(it))}</select>
+            </div>
+            <button class="price-btn" onclick="dispensaToList('${it.id}')">+ lista</button>
+          </div>
+        </div>
+        <button class="remove-btn" onclick="removeDispensaItem('${it.id}')">×</button>
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+  html += `</div>`;
+  el.innerHTML = html;
+}
+
 /* ── INIT ── */
 const sel = document.getElementById("new-cat");
 CATEGORIES.forEach(c => {
@@ -4460,8 +4713,12 @@ CATEGORIES.forEach(c => {
   opt.value = c; opt.textContent = c;
   sel.appendChild(opt);
 });
+const unitSel = document.getElementById("new-unit");
+if(unitSel) unitSel.innerHTML = unitOpts("un");
 loadCatalogOverrides();
 applyTheme(document.documentElement.getAttribute("data-theme") || "light");
+document.getElementById("vm-cat").classList.toggle("active", viewMode==="categoria");
+document.getElementById("vm-flat").classList.toggle("active", viewMode==="corrido");
 render();
 
 /* ── TRAVA O SCROLL DO FUNDO ENQUANTO UM MODAL (bottom-sheet) ESTÁ ABERTO ── */
